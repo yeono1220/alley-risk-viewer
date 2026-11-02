@@ -1,0 +1,75 @@
+{
+  "_note": "가상 데이터(mock). 실제 모델 결과 아님. 화면·연결 규약 검토용.",
+  "run_id": "run_2026-11-02_dev01",
+  "run_label": "개발 샘플 첫 연결 (mock)",
+  "data_kind": "mock",
+  "created_at": "2026-11-02T00:00:00+09:00",
+  "model": {
+    "model_id": "qwen3-vl-8b-instruct",
+    "model_label": "Qwen3-VL-8B-Instruct (미세조정 전 base)",
+    "prompt_version": "p0.1",
+    "schema_version": "s0.1"
+  },
+  "dataset": {
+    "dataset_id": "dev-sample-v0",
+    "dataset_label": "개발용 생활도로 샘플",
+    "label_version": "L0.1",
+    "taxonomy_version": "T0.1-draft",
+    "split": "dev",
+    "sample_count": 12
+  },
+  "scorer": {
+    "scorer_version": "sc0.1",
+    "positive_rule": "GT 판정 == 위험 (등급 경계 미정)",
+    "abstain_rule": "보수적 집계: 보류·실패는 미검출로 취급. 응답한 사례만의 조건부 지표를 별도 표시"
+  },
+  "counts": {
+    "attempted": 12,
+    "scored": 11,
+    "excluded_label_review": 1,
+    "answered": 9,
+    "abstained": 1,
+    "failed": 1,
+    "gt_positive": 7,
+    "gt_negative": 4,
+    "tp": 3,
+    "fn": 2,
+    "fp": 2,
+    "tn": 2
+  },
+  "metrics": {
+    "risk_recall_conservative": { "value": 0.429, "numerator": 3, "denominator": 7, "note": "보류·실패 2건을 미검출로 포함" },
+    "risk_recall_answered_only": { "value": 0.600, "numerator": 3, "denominator": 5, "note": "응답한 양성 사례만" },
+    "risk_precision": { "value": 0.600, "numerator": 3, "denominator": 5 },
+    "action_accuracy": { "value": 0.667, "numerator": 2, "denominator": 3, "note": "TP 3건 중 허용 행동 집합 포함 2건. GT 행동 기준은 협의 중" },
+    "object_f1": { "value": null, "status": "unmeasured", "note": "bbox 범위·IoU 임계값 미정" },
+    "evidence_quality": { "value": null, "status": "unmeasured", "note": "2인 검수 미완료. 개별 사례의 검수 결과만 표시" },
+    "hallucination_rate": { "value": 0.222, "numerator": 2, "denominator": 9, "note": "없는 객체 단정 응답 수 / 검토 가능한 응답 수" },
+    "schema_pass_rate": { "value": 0.917, "numerator": 11, "denominator": 12 },
+    "latency_p50_ms": { "value": null, "status": "unmeasured" }
+  },
+  "error_counts": {
+    "_note": "한 사례가 여러 오류를 가질 수 있어 합계 ≠ 오류 사례 수",
+    "miss": 2,
+    "false_alarm": 2,
+    "action": 1,
+    "object": 1,
+    "evidence": 2,
+    "hallucination": 2,
+    "abstain": 1,
+    "failure": 1,
+    "label_review": 1,
+    "cases_with_any_error": 9
+  },
+  "by_factor": [
+    { "factor_id": "F1", "factor_label": "보행·차량 통행 공간 공유", "n": 4, "tp": 3, "fn": 0, "fp": 1, "abstain": 0, "failure": 0, "recall": 1.0, "precision": 0.75 },
+    { "factor_id": "F2", "factor_label": "시야 가림", "n": 3, "tp": 1, "fn": 1, "fp": 0, "abstain": 1, "failure": 0, "recall": 0.333, "precision": 1.0 },
+    { "factor_id": "F3", "factor_label": "통행 공간 제한", "n": 3, "tp": 0, "fn": 0, "fp": 1, "abstain": 0, "failure": 1, "recall": null, "precision": 0.0 },
+    { "factor_id": "F4", "factor_label": "횡단·합류 접점", "n": 2, "tp": 0, "fn": 1, "fp": 0, "abstain": 0, "failure": 0, "recall": 0.0, "precision": null },
+    { "factor_id": "F5", "factor_label": "임시 통행 환경 변화", "n": 1, "tp": 0, "fn": 0, "fp": 0, "abstain": 0, "failure": 0, "recall": null, "precision": null, "note": "라벨 재검토 1건으로 채점 제외" }
+  ],
+  "other_runs": [
+    { "run_id": null, "model_label": "상용 VLM zero-shot (미정)", "status": "not_run" },
+    { "run_id": null, "model_label": "LoRA 미세조정 모델", "status": "not_run" }
+  ]
+}

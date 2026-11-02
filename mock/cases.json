@@ -1,0 +1,92 @@
+{
+  "_note": "가상 데이터(mock). run_2026-11-02_dev01 의 12건. 이미지는 자리표시 도형. confidence는 산출 방법 미정이라 null.",
+  "run_id": "run_2026-11-02_dev01",
+  "cases": [
+    {
+      "sample_id": "S-001", "status": "ok", "error_types": [],
+      "scene": "주간 골목, 보행자 2명이 도로 중앙을 걷고 있음", "conditions": ["주간"],
+      "gt": { "judgment": "위험", "risk_level": "high", "factors": ["F1"], "objects": ["보행자", "보행자"], "evidence": "보행자 2명이 자차 통과 경로 중앙을 점유. 좌우 회피 폭 없음.", "allowed_actions": ["정지 준비", "정지"] },
+      "pred": { "judgment": "위험", "risk_level": "high", "factors": ["F1"], "objects": ["보행자", "보행자"], "observed": "도로 중앙에 보행자 2명이 있음.", "inference": "보행자가 경로를 막고 있어 접근 시 충돌 가능.", "action": "정지 준비", "limits": "보행자 진행 방향은 정지 이미지로 확인 불가.", "confidence": null, "abstain_reason": null },
+      "review": { "reviewer": "검수자A", "evidence_ok": true, "note": "관측·판정 모두 일치." }
+    },
+    {
+      "sample_id": "S-002", "status": "ok", "error_types": ["miss", "object"],
+      "scene": "주간 골목, 주차 차량 사이로 어린이 상반신이 보임", "conditions": ["주간"],
+      "gt": { "judgment": "위험", "risk_level": "high", "factors": ["F2"], "objects": ["어린이", "주차 차량"], "evidence": "우측 주차 차량 두 대 사이에서 어린이 상반신 확인. 경로로 나올 수 있는 위치.", "allowed_actions": ["정지 준비", "정지"] },
+      "pred": { "judgment": "안전", "risk_level": "low", "factors": [], "objects": ["주차 차량"], "observed": "양측에 주차 차량이 있고 보행자는 보이지 않음.", "inference": "통과 폭이 충분해 보임.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null },
+      "review": { "reviewer": "검수자A", "evidence_ok": false, "note": "어린이를 보지 못함. 가려진 객체 미검출 전형 사례." }
+    },
+    {
+      "sample_id": "S-003", "status": "ok", "error_types": ["evidence"],
+      "scene": "주간 골목, 보행자 1명이 좌측 주차 차량 옆을 걷고 있음", "conditions": ["주간"],
+      "gt": { "judgment": "위험", "risk_level": "medium", "factors": ["F1", "F2"], "objects": ["보행자", "주차 차량"], "evidence": "보행자가 좌측 주차 차량 바깥쪽을 걸어 경로와 겹침. 차량 뒤 공간은 확인 불가.", "allowed_actions": ["서행", "정지 준비"] },
+      "pred": { "judgment": "위험", "risk_level": "medium", "factors": ["F1"], "objects": [], "observed": "주택가 좁은 골목길.", "inference": "주택가 골목은 보행자가 갑자기 나올 수 있어 위험.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null },
+      "review": { "reviewer": "검수자B", "evidence_ok": false, "note": "판정은 맞지만 근거가 장소 상식뿐. 실제 보행자를 관측했다는 서술 없음. 핵심 가설 사례." }
+    },
+    {
+      "sample_id": "S-004", "status": "ok", "error_types": ["false_alarm", "hallucination"],
+      "scene": "주간 골목, 보행자·차량 없음, 전봇대와 화분만 있음", "conditions": ["주간"],
+      "gt": { "judgment": "안전", "risk_level": "low", "factors": ["F1"], "objects": [], "evidence": "경로 상 객체 없음. 통과 폭 충분.", "allowed_actions": ["서행", "직진"] },
+      "pred": { "judgment": "위험", "risk_level": "high", "factors": ["F1"], "objects": ["보행자"], "observed": "우측에 보행자 1명이 서 있음.", "inference": "보행자가 경로로 진입할 수 있음.", "action": "정지 준비", "limits": null, "confidence": null, "abstain_reason": null },
+      "review": { "reviewer": "검수자A", "evidence_ok": false, "note": "보행자 없음. 전봇대를 보행자로 단정 → 환각." }
+    },
+    {
+      "sample_id": "S-005", "status": "ok", "error_types": ["action"],
+      "scene": "주간 골목, 보행자가 경로 한가운데 정면을 향해 서 있음", "conditions": ["주간"],
+      "gt": { "judgment": "위험", "risk_level": "high", "factors": ["F1"], "objects": ["보행자"], "evidence": "보행자가 경로 중앙 근거리에 있음. 회피 불가.", "allowed_actions": ["정지"] },
+      "pred": { "judgment": "위험", "risk_level": "medium", "factors": ["F1"], "objects": ["보행자"], "observed": "경로 중앙에 보행자 1명.", "inference": "접근 시 위험.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null },
+      "review": { "reviewer": "검수자B", "evidence_ok": true, "note": "객체·근거 정확. 행동만 과소 대응(정지→서행)." }
+    },
+    {
+      "sample_id": "S-006", "status": "ok", "error_types": [],
+      "scene": "주간 골목, 우측 주차 차량 1대, 통과 폭 충분", "conditions": ["주간"],
+      "gt": { "judgment": "안전", "risk_level": "low", "factors": ["F3"], "objects": ["주차 차량"], "evidence": "주차 차량 1대. 남은 폭 충분.", "allowed_actions": ["서행", "직진"] },
+      "pred": { "judgment": "안전", "risk_level": "low", "factors": ["F3"], "objects": ["주차 차량"], "observed": "우측 주차 차량 1대, 좌측 여유 있음.", "inference": "통과 가능.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null },
+      "review": { "reviewer": "검수자A", "evidence_ok": true, "note": "일치." }
+    },
+    {
+      "sample_id": "S-007", "status": "abstain", "error_types": ["abstain"],
+      "scene": "야간 골목, 가로등 아래 주차 차량, 어두운 영역에 보행자 실루엣", "conditions": ["야간"],
+      "gt": { "judgment": "위험", "risk_level": "medium", "factors": ["F2"], "objects": ["보행자", "주차 차량"], "evidence": "우측 어두운 영역에 보행자 실루엣. 주차 차량 뒤 공간 확인 불가.", "allowed_actions": ["서행", "정지 준비"] },
+      "pred": { "judgment": null, "risk_level": null, "factors": [], "objects": ["주차 차량"], "observed": "야간, 우측에 주차 차량. 어두운 영역은 식별 불가.", "inference": null, "action": null, "limits": "조도 부족으로 우측 영역 판단 불가.", "confidence": null, "abstain_reason": "조도 부족" },
+      "review": { "reviewer": "검수자B", "evidence_ok": null, "note": "보류 사유 타당. '낮은 위험'으로 바꾸지 않음. 보수적 집계에서는 미검출로 포함." }
+    },
+    {
+      "sample_id": "S-008", "status": "format_error", "error_types": ["failure"],
+      "scene": "주간 골목, 맞은편 차량과 주차 차량으로 통과 폭 부족", "conditions": ["주간"],
+      "gt": { "judgment": "위험", "risk_level": "medium", "factors": ["F3"], "objects": ["맞은편 차량", "주차 차량"], "evidence": "맞은편 차량 접근 중, 주차 차량으로 교행 공간 없음.", "allowed_actions": ["정지", "정지 준비"] },
+      "pred": null,
+      "raw_response_excerpt": "{\"judgment\": \"위험\", \"factors\": [\"F3\", \"risk_level\": ...",
+      "failure": { "code": "SCHEMA_INVALID", "message": "JSON 파싱 실패 (위치 41)", "retry_count": 1, "retryable": true },
+      "review": null
+    },
+    {
+      "sample_id": "S-009", "status": "ok", "error_types": ["false_alarm"],
+      "scene": "주간 골목, 양측 주차 차량 있으나 중앙 통과 폭 확보", "conditions": ["주간"],
+      "gt": { "judgment": "안전", "risk_level": "low", "factors": ["F3"], "objects": ["주차 차량", "주차 차량"], "evidence": "양측 주차에도 중앙 통과 폭 확보. 보행자 없음.", "allowed_actions": ["서행"] },
+      "pred": { "judgment": "위험", "risk_level": "medium", "factors": ["F3"], "objects": ["주차 차량", "주차 차량"], "observed": "양측 주차 차량.", "inference": "통과 폭이 좁아 접촉 위험.", "action": "정지 준비", "limits": null, "confidence": null, "abstain_reason": null },
+      "review": { "reviewer": "검수자A", "evidence_ok": true, "note": "객체·관측은 맞으나 폭 판단 과도. 과잉 경고." }
+    },
+    {
+      "sample_id": "S-010", "status": "ok", "error_types": ["miss", "hallucination"],
+      "scene": "주간, 골목 출입부에서 보행자가 대로로 나가려 함", "conditions": ["주간"],
+      "gt": { "judgment": "위험", "risk_level": "medium", "factors": ["F4"], "objects": ["보행자"], "evidence": "출입부 우측 모서리에 보행자. 자차 진행 경로와 접점.", "allowed_actions": ["서행", "정지 준비"] },
+      "pred": { "judgment": "안전", "risk_level": "low", "factors": ["F4"], "objects": ["횡단보도"], "observed": "전방에 횡단보도가 있고 보행자는 없음.", "inference": "횡단보도에 보행자가 없어 안전.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null },
+      "review": { "reviewer": "검수자B", "evidence_ok": false, "note": "횡단보도 없음(환각). 실제 보행자는 미검출(미탐)." }
+    },
+    {
+      "sample_id": "S-011", "status": "ok", "error_types": ["evidence"],
+      "scene": "주간, 골목 합류부, 보행자가 보도 쪽 벽에 붙어 서 있음", "conditions": ["주간"],
+      "gt": { "judgment": "안전", "risk_level": "low", "factors": ["F4"], "objects": ["보행자"], "evidence": "보행자가 벽면에 붙어 경로 밖에 위치.", "allowed_actions": ["서행"] },
+      "pred": { "judgment": "안전", "risk_level": "low", "factors": ["F4"], "objects": ["보행자"], "observed": "보행자가 벽 옆에 멈춰 서서 차량을 기다리고 있음.", "inference": "보행자가 멈춰 설 것이므로 안전.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null },
+      "review": { "reviewer": "검수자A", "evidence_ok": false, "note": "판정 일치. 그러나 '기다리고 있음', '멈춰 설 것'은 정지 이미지로 관측 불가한 동작 단정 → 근거 오류." }
+    },
+    {
+      "sample_id": "S-012", "status": "label_review", "error_types": ["label_review"],
+      "scene": "주간, 공사 적치물이 우측 절반을 막음, 작업자 유무 불명확", "conditions": ["주간"],
+      "gt": { "judgment": null, "risk_level": null, "factors": ["F5"], "objects": ["적치물"], "evidence": null, "allowed_actions": [], "review_reason": "작업자 존재 여부 검수자 간 불일치. 재검토 대기." },
+      "pred": { "judgment": "위험", "risk_level": "medium", "factors": ["F5"], "objects": ["적치물"], "observed": "우측에 공사 적치물.", "inference": "통과 폭 제한.", "action": "서행", "limits": "작업자 유무 확인 불가.", "confidence": null, "abstain_reason": null },
+      "review": { "reviewer": "검수자A·B", "evidence_ok": null, "note": "GT 미확정. 채점 제외, 사유 공개." }
+    }
+  ]
+}

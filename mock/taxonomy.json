@@ -1,0 +1,28 @@
+{
+  "_note": "실제 사례 검증 전 초안(T0.1-draft). 최종 분류 체계 아님. 한 장면에 여러 요인 허용.",
+  "taxonomy_version": "T0.1-draft",
+  "factors": [
+    { "id": "F1", "label": "보행·차량 통행 공간 공유", "desc": "보행자가 자차 통과 경로를 점유" },
+    { "id": "F2", "label": "시야 가림", "desc": "주차 차량·구조물로 확인 불가 공간. 가림 뒤 객체 존재를 단정하지 않음" },
+    { "id": "F3", "label": "통행 공간 제한", "desc": "주정차·맞은편 차량으로 남은 통과 폭 부족" },
+    { "id": "F4", "label": "횡단·합류 접점", "desc": "골목 출입부·횡단 접점과 진행 경로 관계" },
+    { "id": "F5", "label": "임시 통행 환경 변화", "desc": "공사·적치물 등" }
+  ],
+  "object_tags": ["보행자", "어린이", "이륜차", "킥보드", "주차 차량", "맞은편 차량", "적치물"],
+  "condition_tags": ["주간", "야간", "우천", "역광"],
+  "judgments": ["안전", "위험"],
+  "risk_levels": { "values": ["low", "medium", "high"], "note": "등급 경계·안전/위험 변환 규칙 미정" },
+  "actions": { "values": ["직진", "서행", "정지 준비", "정지"], "note": "허용 행동 집합과 GT 기준은 팀·카카오 협의" },
+  "error_types": [
+    { "id": "miss", "label": "미탐", "desc": "GT 위험을 안전으로 예측" },
+    { "id": "false_alarm", "label": "오경보", "desc": "GT 안전을 위험으로 예측" },
+    { "id": "action", "label": "행동 오류", "desc": "예측 행동이 허용 행동 집합 밖 (과소/과잉)" },
+    { "id": "object", "label": "객체 오류", "desc": "위험 객체 미검출 또는 오검출" },
+    { "id": "evidence", "label": "근거 오류", "desc": "관측 사실 오류, 판정과 근거 불연결, 관측 불가 동작 단정" },
+    { "id": "hallucination", "label": "환각", "desc": "존재하지 않는 객체를 단정" },
+    { "id": "abstain", "label": "판단 보류", "desc": "모델이 스스로 보류. 사유 필수" },
+    { "id": "failure", "label": "형식 오류·호출 실패", "desc": "백엔드가 기록하는 실행 상태" },
+    { "id": "label_review", "label": "라벨 재검토", "desc": "GT 불확실로 채점 제외. 사유 공개" }
+  ],
+  "case_status": ["ok", "abstain", "format_error", "call_failed", "label_review"]
+}

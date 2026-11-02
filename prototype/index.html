@@ -1,0 +1,358 @@
+<title>생활도로 VLM 평가 뷰어</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 3 views on one page (summary / cases / detail), routed on hash. Dense evaluation-tool UI, GT and prediction always side by side and visually distinct. */
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --fg:#1d1f22; --muted:#6b6f76; --line:#dcdad4;
+  --accent:#2457a6; --accent-soft:#e3ebf8;
+  --gt:#2f6b3f; --gt-soft:#e4f0e6;      /* 사람 검수 정답 */
+  --pred:#7a4a9e; --pred-soft:#efe6f6;  /* 모델 예측 */
+  --danger:#b4322e; --danger-soft:#f8e3e1;
+  --warn:#9a6300; --warn-soft:#fbefd3;
+  --mock:#b35a00; --mock-soft:#ffe9d1;
+  --font:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17191c; --panel:#202327; --fg:#e8e6e1; --muted:#9a9ea6; --line:#353940;
+  --accent:#7ea4e6; --accent-soft:#1f2c42;
+  --gt:#7cc48f; --gt-soft:#1d2f22; --pred:#c49ae8; --pred-soft:#2d2138;
+  --danger:#ef8a85; --danger-soft:#3a2120; --warn:#e2b25a; --warn-soft:#3a2e14;
+  --mock:#f0a35c; --mock-soft:#3a2a18; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17191c; --panel:#202327; --fg:#e8e6e1; --muted:#9a9ea6; --line:#353940;
+  --accent:#7ea4e6; --accent-soft:#1f2c42;
+  --gt:#7cc48f; --gt-soft:#1d2f22; --pred:#c49ae8; --pred-soft:#2d2138;
+  --danger:#ef8a85; --danger-soft:#3a2120; --warn:#e2b25a; --warn-soft:#3a2e14;
+  --mock:#f0a35c; --mock-soft:#3a2a18; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
+h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
+h1{font-size:18px}h2{font-size:15px}h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+a{color:var(--accent)}
+button{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+select{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding-block:10px;margin-bottom:16px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.crumbs{display:flex;gap:6px;align-items:center;color:var(--muted);flex-wrap:wrap}
+.crumbs b{color:var(--fg)}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid transparent;white-space:nowrap}
+.pill.mock{background:var(--mock-soft);color:var(--mock);border-color:var(--mock)}
+.pill.gt{background:var(--gt-soft);color:var(--gt)}
+.pill.pred{background:var(--pred-soft);color:var(--pred)}
+.pill.err{background:var(--danger-soft);color:var(--danger)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.neutral{background:var(--accent-soft);color:var(--accent)}
+.pill.dim{border-color:var(--line);color:var(--muted)}
+.mono{font-family:var(--mono);font-size:12px}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.grid{display:grid;gap:12px}
+.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:760px){.cols-4,.cols-3{grid-template-columns:repeat(2,minmax(0,1fr))}.cols-2{grid-template-columns:1fr}}
+@media (max-width:420px){.cols-4,.cols-3{grid-template-columns:1fr}}
+.stat .label{font-size:12px;color:var(--muted)}
+.stat .val{font-size:26px;font-weight:600;line-height:1.1;margin-top:4px}
+.stat .sub{font-size:12px;color:var(--muted);margin-top:4px}
+.stat.clickable{cursor:pointer}.stat.clickable:hover{border-color:var(--accent)}
+.stat .val.unm{font-size:15px;color:var(--muted);font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:500}
+td.num,th.num{text-align:right}
+.tablewrap{overflow-x:auto}
+tr.row{cursor:pointer}tr.row:hover td{background:var(--accent-soft)}
+.cnt{color:var(--accent);text-decoration:underline;cursor:pointer}
+.section{display:grid;gap:12px;margin-bottom:22px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.filters .lbl{font-size:12px;color:var(--muted);margin-right:4px}
+.thumb{width:72px;height:48px;border-radius:4px;border:1px solid var(--line);flex:none;background:#8d9aa6}
+.thumb svg,.scene svg{display:block;width:100%;height:100%}
+.scene{position:relative;aspect-ratio:16/10;max-width:100%;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#8d9aa6}
+.scene .tag{position:absolute;top:8px;left:8px}
+.zoom{position:absolute;right:8px;bottom:8px;display:flex;gap:4px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.cmp{grid-template-columns:1fr}}
+.col{border-radius:8px;padding:12px;border:1px solid var(--line);background:var(--panel);min-width:0}
+.col.gt{border-top:4px solid var(--gt)}.col.pred{border-top:4px solid var(--pred)}
+.col h2{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.kv{display:grid;grid-template-columns:88px 1fr;gap:6px 10px;font-size:13px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;min-width:0}
+.kv dd.empty{color:var(--muted);font-style:italic}
+.notice{border-left:3px solid var(--warn);background:var(--warn-soft);padding:8px 12px;border-radius:0 6px 6px 0;font-size:13px}
+.notice.err{border-color:var(--danger);background:var(--danger-soft)}
+.notice.info{border-color:var(--accent);background:var(--accent-soft)}
+.empty{padding:40px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:8px}
+.flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.flow .step{padding:2px 8px;border:1px solid var(--line);border-radius:4px}
+.flow .step.cur{border-color:var(--accent);color:var(--accent);font-weight:600}
+.spec{font-size:12px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px;margin-top:4px}
+.spec code{font-family:var(--mono);font-size:11px;background:var(--accent-soft);padding:0 4px;border-radius:3px}
+details summary{cursor:pointer;color:var(--muted);font-size:12px}
+.skel{height:14px;border-radius:4px;background:linear-gradient(90deg,var(--line),var(--panel),var(--line));background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
+.statebar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+.statebar button{font-size:12px;padding:3px 8px}
+.listrow{display:flex;gap:10px;align-items:flex-start}
+.listrow .txt{min-width:0}
+.wrapcol{min-width:0}
+</style>
+<div class="topbar">
+  <h1>생활도로 VLM 평가 뷰어</h1>
+  <span class="pill mock">가상 데이터 · 실제 모델 결과 아님</span>
+  <div class="crumbs" id="crumbs"></div>
+  <div class="flow" style="margin-left:auto">
+    <span class="step" id="st1">F1 평가 요약</span>→<span class="step" id="st2">F2 오류 목록</span>→<span class="step" id="st3">F3 사례 상세</span>
+  </div>
+</div>
+<div class="statebar" style="margin-bottom:14px">
+  <span>예외 상태 미리보기:</span>
+  <button data-state="normal" class="on">정상</button>
+  <button data-state="loading">로딩</button>
+  <button data-state="empty">결과 없음</button>
+  <button data-state="apierror">조회 실패</button>
+  <span class="muted">· 모든 화면은 같은 run_id로 연결됨 · 뒤로 가도 필터 유지</span>
+</div>
+<main id="app"></main>
+
+<script>const DATA={"run": {"_note": "가상 데이터(mock). 실제 모델 결과 아님. 화면·연결 규약 검토용.", "run_id": "run_2026-11-02_dev01", "run_label": "개발 샘플 첫 연결 (mock)", "data_kind": "mock", "created_at": "2026-11-02T00:00:00+09:00", "model": {"model_id": "qwen3-vl-8b-instruct", "model_label": "Qwen3-VL-8B-Instruct (미세조정 전 base)", "prompt_version": "p0.1", "schema_version": "s0.1"}, "dataset": {"dataset_id": "dev-sample-v0", "dataset_label": "개발용 생활도로 샘플", "label_version": "L0.1", "taxonomy_version": "T0.1-draft", "split": "dev", "sample_count": 12}, "scorer": {"scorer_version": "sc0.1", "positive_rule": "GT 판정 == 위험 (등급 경계 미정)", "abstain_rule": "보수적 집계: 보류·실패는 미검출로 취급. 응답한 사례만의 조건부 지표를 별도 표시"}, "counts": {"attempted": 12, "scored": 11, "excluded_label_review": 1, "answered": 9, "abstained": 1, "failed": 1, "gt_positive": 7, "gt_negative": 4, "tp": 3, "fn": 2, "fp": 2, "tn": 2}, "metrics": {"risk_recall_conservative": {"value": 0.429, "numerator": 3, "denominator": 7, "note": "보류·실패 2건을 미검출로 포함"}, "risk_recall_answered_only": {"value": 0.6, "numerator": 3, "denominator": 5, "note": "응답한 양성 사례만"}, "risk_precision": {"value": 0.6, "numerator": 3, "denominator": 5}, "action_accuracy": {"value": 0.667, "numerator": 2, "denominator": 3, "note": "TP 3건 중 허용 행동 집합 포함 2건. GT 행동 기준은 협의 중"}, "object_f1": {"value": null, "status": "unmeasured", "note": "bbox 범위·IoU 임계값 미정"}, "evidence_quality": {"value": null, "status": "unmeasured", "note": "2인 검수 미완료. 개별 사례의 검수 결과만 표시"}, "hallucination_rate": {"value": 0.222, "numerator": 2, "denominator": 9, "note": "없는 객체 단정 응답 수 / 검토 가능한 응답 수"}, "schema_pass_rate": {"value": 0.917, "numerator": 11, "denominator": 12}, "latency_p50_ms": {"value": null, "status": "unmeasured"}}, "error_counts": {"_note": "한 사례가 여러 오류를 가질 수 있어 합계 ≠ 오류 사례 수", "miss": 2, "false_alarm": 2, "action": 1, "object": 1, "evidence": 2, "hallucination": 2, "abstain": 1, "failure": 1, "label_review": 1, "cases_with_any_error": 9}, "by_factor": [{"factor_id": "F1", "factor_label": "보행·차량 통행 공간 공유", "n": 4, "tp": 3, "fn": 0, "fp": 1, "abstain": 0, "failure": 0, "recall": 1.0, "precision": 0.75}, {"factor_id": "F2", "factor_label": "시야 가림", "n": 3, "tp": 1, "fn": 1, "fp": 0, "abstain": 1, "failure": 0, "recall": 0.333, "precision": 1.0}, {"factor_id": "F3", "factor_label": "통행 공간 제한", "n": 3, "tp": 0, "fn": 0, "fp": 1, "abstain": 0, "failure": 1, "recall": null, "precision": 0.0}, {"factor_id": "F4", "factor_label": "횡단·합류 접점", "n": 2, "tp": 0, "fn": 1, "fp": 0, "abstain": 0, "failure": 0, "recall": 0.0, "precision": null}, {"factor_id": "F5", "factor_label": "임시 통행 환경 변화", "n": 1, "tp": 0, "fn": 0, "fp": 0, "abstain": 0, "failure": 0, "recall": null, "precision": null, "note": "라벨 재검토 1건으로 채점 제외"}], "other_runs": [{"run_id": null, "model_label": "상용 VLM zero-shot (미정)", "status": "not_run"}, {"run_id": null, "model_label": "LoRA 미세조정 모델", "status": "not_run"}]}, "taxonomy": {"_note": "실제 사례 검증 전 초안(T0.1-draft). 최종 분류 체계 아님. 한 장면에 여러 요인 허용.", "taxonomy_version": "T0.1-draft", "factors": [{"id": "F1", "label": "보행·차량 통행 공간 공유", "desc": "보행자가 자차 통과 경로를 점유"}, {"id": "F2", "label": "시야 가림", "desc": "주차 차량·구조물로 확인 불가 공간. 가림 뒤 객체 존재를 단정하지 않음"}, {"id": "F3", "label": "통행 공간 제한", "desc": "주정차·맞은편 차량으로 남은 통과 폭 부족"}, {"id": "F4", "label": "횡단·합류 접점", "desc": "골목 출입부·횡단 접점과 진행 경로 관계"}, {"id": "F5", "label": "임시 통행 환경 변화", "desc": "공사·적치물 등"}], "object_tags": ["보행자", "어린이", "이륜차", "킥보드", "주차 차량", "맞은편 차량", "적치물"], "condition_tags": ["주간", "야간", "우천", "역광"], "judgments": ["안전", "위험"], "risk_levels": {"values": ["low", "medium", "high"], "note": "등급 경계·안전/위험 변환 규칙 미정"}, "actions": {"values": ["직진", "서행", "정지 준비", "정지"], "note": "허용 행동 집합과 GT 기준은 팀·카카오 협의"}, "error_types": [{"id": "miss", "label": "미탐", "desc": "GT 위험을 안전으로 예측"}, {"id": "false_alarm", "label": "오경보", "desc": "GT 안전을 위험으로 예측"}, {"id": "action", "label": "행동 오류", "desc": "예측 행동이 허용 행동 집합 밖 (과소/과잉)"}, {"id": "object", "label": "객체 오류", "desc": "위험 객체 미검출 또는 오검출"}, {"id": "evidence", "label": "근거 오류", "desc": "관측 사실 오류, 판정과 근거 불연결, 관측 불가 동작 단정"}, {"id": "hallucination", "label": "환각", "desc": "존재하지 않는 객체를 단정"}, {"id": "abstain", "label": "판단 보류", "desc": "모델이 스스로 보류. 사유 필수"}, {"id": "failure", "label": "형식 오류·호출 실패", "desc": "백엔드가 기록하는 실행 상태"}, {"id": "label_review", "label": "라벨 재검토", "desc": "GT 불확실로 채점 제외. 사유 공개"}], "case_status": ["ok", "abstain", "format_error", "call_failed", "label_review"]}, "cases": [{"sample_id": "S-001", "status": "ok", "error_types": [], "scene": "주간 골목, 보행자 2명이 도로 중앙을 걷고 있음", "conditions": ["주간"], "gt": {"judgment": "위험", "risk_level": "high", "factors": ["F1"], "objects": ["보행자", "보행자"], "evidence": "보행자 2명이 자차 통과 경로 중앙을 점유. 좌우 회피 폭 없음.", "allowed_actions": ["정지 준비", "정지"]}, "pred": {"judgment": "위험", "risk_level": "high", "factors": ["F1"], "objects": ["보행자", "보행자"], "observed": "도로 중앙에 보행자 2명이 있음.", "inference": "보행자가 경로를 막고 있어 접근 시 충돌 가능.", "action": "정지 준비", "limits": "보행자 진행 방향은 정지 이미지로 확인 불가.", "confidence": null, "abstain_reason": null}, "review": {"reviewer": "검수자A", "evidence_ok": true, "note": "관측·판정 모두 일치."}}, {"sample_id": "S-002", "status": "ok", "error_types": ["miss", "object"], "scene": "주간 골목, 주차 차량 사이로 어린이 상반신이 보임", "conditions": ["주간"], "gt": {"judgment": "위험", "risk_level": "high", "factors": ["F2"], "objects": ["어린이", "주차 차량"], "evidence": "우측 주차 차량 두 대 사이에서 어린이 상반신 확인. 경로로 나올 수 있는 위치.", "allowed_actions": ["정지 준비", "정지"]}, "pred": {"judgment": "안전", "risk_level": "low", "factors": [], "objects": ["주차 차량"], "observed": "양측에 주차 차량이 있고 보행자는 보이지 않음.", "inference": "통과 폭이 충분해 보임.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null}, "review": {"reviewer": "검수자A", "evidence_ok": false, "note": "어린이를 보지 못함. 가려진 객체 미검출 전형 사례."}}, {"sample_id": "S-003", "status": "ok", "error_types": ["evidence"], "scene": "주간 골목, 보행자 1명이 좌측 주차 차량 옆을 걷고 있음", "conditions": ["주간"], "gt": {"judgment": "위험", "risk_level": "medium", "factors": ["F1", "F2"], "objects": ["보행자", "주차 차량"], "evidence": "보행자가 좌측 주차 차량 바깥쪽을 걸어 경로와 겹침. 차량 뒤 공간은 확인 불가.", "allowed_actions": ["서행", "정지 준비"]}, "pred": {"judgment": "위험", "risk_level": "medium", "factors": ["F1"], "objects": [], "observed": "주택가 좁은 골목길.", "inference": "주택가 골목은 보행자가 갑자기 나올 수 있어 위험.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null}, "review": {"reviewer": "검수자B", "evidence_ok": false, "note": "판정은 맞지만 근거가 장소 상식뿐. 실제 보행자를 관측했다는 서술 없음. 핵심 가설 사례."}}, {"sample_id": "S-004", "status": "ok", "error_types": ["false_alarm", "hallucination"], "scene": "주간 골목, 보행자·차량 없음, 전봇대와 화분만 있음", "conditions": ["주간"], "gt": {"judgment": "안전", "risk_level": "low", "factors": ["F1"], "objects": [], "evidence": "경로 상 객체 없음. 통과 폭 충분.", "allowed_actions": ["서행", "직진"]}, "pred": {"judgment": "위험", "risk_level": "high", "factors": ["F1"], "objects": ["보행자"], "observed": "우측에 보행자 1명이 서 있음.", "inference": "보행자가 경로로 진입할 수 있음.", "action": "정지 준비", "limits": null, "confidence": null, "abstain_reason": null}, "review": {"reviewer": "검수자A", "evidence_ok": false, "note": "보행자 없음. 전봇대를 보행자로 단정 → 환각."}}, {"sample_id": "S-005", "status": "ok", "error_types": ["action"], "scene": "주간 골목, 보행자가 경로 한가운데 정면을 향해 서 있음", "conditions": ["주간"], "gt": {"judgment": "위험", "risk_level": "high", "factors": ["F1"], "objects": ["보행자"], "evidence": "보행자가 경로 중앙 근거리에 있음. 회피 불가.", "allowed_actions": ["정지"]}, "pred": {"judgment": "위험", "risk_level": "medium", "factors": ["F1"], "objects": ["보행자"], "observed": "경로 중앙에 보행자 1명.", "inference": "접근 시 위험.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null}, "review": {"reviewer": "검수자B", "evidence_ok": true, "note": "객체·근거 정확. 행동만 과소 대응(정지→서행)."}}, {"sample_id": "S-006", "status": "ok", "error_types": [], "scene": "주간 골목, 우측 주차 차량 1대, 통과 폭 충분", "conditions": ["주간"], "gt": {"judgment": "안전", "risk_level": "low", "factors": ["F3"], "objects": ["주차 차량"], "evidence": "주차 차량 1대. 남은 폭 충분.", "allowed_actions": ["서행", "직진"]}, "pred": {"judgment": "안전", "risk_level": "low", "factors": ["F3"], "objects": ["주차 차량"], "observed": "우측 주차 차량 1대, 좌측 여유 있음.", "inference": "통과 가능.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null}, "review": {"reviewer": "검수자A", "evidence_ok": true, "note": "일치."}}, {"sample_id": "S-007", "status": "abstain", "error_types": ["abstain"], "scene": "야간 골목, 가로등 아래 주차 차량, 어두운 영역에 보행자 실루엣", "conditions": ["야간"], "gt": {"judgment": "위험", "risk_level": "medium", "factors": ["F2"], "objects": ["보행자", "주차 차량"], "evidence": "우측 어두운 영역에 보행자 실루엣. 주차 차량 뒤 공간 확인 불가.", "allowed_actions": ["서행", "정지 준비"]}, "pred": {"judgment": null, "risk_level": null, "factors": [], "objects": ["주차 차량"], "observed": "야간, 우측에 주차 차량. 어두운 영역은 식별 불가.", "inference": null, "action": null, "limits": "조도 부족으로 우측 영역 판단 불가.", "confidence": null, "abstain_reason": "조도 부족"}, "review": {"reviewer": "검수자B", "evidence_ok": null, "note": "보류 사유 타당. '낮은 위험'으로 바꾸지 않음. 보수적 집계에서는 미검출로 포함."}}, {"sample_id": "S-008", "status": "format_error", "error_types": ["failure"], "scene": "주간 골목, 맞은편 차량과 주차 차량으로 통과 폭 부족", "conditions": ["주간"], "gt": {"judgment": "위험", "risk_level": "medium", "factors": ["F3"], "objects": ["맞은편 차량", "주차 차량"], "evidence": "맞은편 차량 접근 중, 주차 차량으로 교행 공간 없음.", "allowed_actions": ["정지", "정지 준비"]}, "pred": null, "raw_response_excerpt": "{\"judgment\": \"위험\", \"factors\": [\"F3\", \"risk_level\": ...", "failure": {"code": "SCHEMA_INVALID", "message": "JSON 파싱 실패 (위치 41)", "retry_count": 1, "retryable": true}, "review": null}, {"sample_id": "S-009", "status": "ok", "error_types": ["false_alarm"], "scene": "주간 골목, 양측 주차 차량 있으나 중앙 통과 폭 확보", "conditions": ["주간"], "gt": {"judgment": "안전", "risk_level": "low", "factors": ["F3"], "objects": ["주차 차량", "주차 차량"], "evidence": "양측 주차에도 중앙 통과 폭 확보. 보행자 없음.", "allowed_actions": ["서행"]}, "pred": {"judgment": "위험", "risk_level": "medium", "factors": ["F3"], "objects": ["주차 차량", "주차 차량"], "observed": "양측 주차 차량.", "inference": "통과 폭이 좁아 접촉 위험.", "action": "정지 준비", "limits": null, "confidence": null, "abstain_reason": null}, "review": {"reviewer": "검수자A", "evidence_ok": true, "note": "객체·관측은 맞으나 폭 판단 과도. 과잉 경고."}}, {"sample_id": "S-010", "status": "ok", "error_types": ["miss", "hallucination"], "scene": "주간, 골목 출입부에서 보행자가 대로로 나가려 함", "conditions": ["주간"], "gt": {"judgment": "위험", "risk_level": "medium", "factors": ["F4"], "objects": ["보행자"], "evidence": "출입부 우측 모서리에 보행자. 자차 진행 경로와 접점.", "allowed_actions": ["서행", "정지 준비"]}, "pred": {"judgment": "안전", "risk_level": "low", "factors": ["F4"], "objects": ["횡단보도"], "observed": "전방에 횡단보도가 있고 보행자는 없음.", "inference": "횡단보도에 보행자가 없어 안전.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null}, "review": {"reviewer": "검수자B", "evidence_ok": false, "note": "횡단보도 없음(환각). 실제 보행자는 미검출(미탐)."}}, {"sample_id": "S-011", "status": "ok", "error_types": ["evidence"], "scene": "주간, 골목 합류부, 보행자가 보도 쪽 벽에 붙어 서 있음", "conditions": ["주간"], "gt": {"judgment": "안전", "risk_level": "low", "factors": ["F4"], "objects": ["보행자"], "evidence": "보행자가 벽면에 붙어 경로 밖에 위치.", "allowed_actions": ["서행"]}, "pred": {"judgment": "안전", "risk_level": "low", "factors": ["F4"], "objects": ["보행자"], "observed": "보행자가 벽 옆에 멈춰 서서 차량을 기다리고 있음.", "inference": "보행자가 멈춰 설 것이므로 안전.", "action": "서행", "limits": null, "confidence": null, "abstain_reason": null}, "review": {"reviewer": "검수자A", "evidence_ok": false, "note": "판정 일치. 그러나 '기다리고 있음', '멈춰 설 것'은 정지 이미지로 관측 불가한 동작 단정 → 근거 오류."}}, {"sample_id": "S-012", "status": "label_review", "error_types": ["label_review"], "scene": "주간, 공사 적치물이 우측 절반을 막음, 작업자 유무 불명확", "conditions": ["주간"], "gt": {"judgment": null, "risk_level": null, "factors": ["F5"], "objects": ["적치물"], "evidence": null, "allowed_actions": [], "review_reason": "작업자 존재 여부 검수자 간 불일치. 재검토 대기."}, "pred": {"judgment": "위험", "risk_level": "medium", "factors": ["F5"], "objects": ["적치물"], "observed": "우측에 공사 적치물.", "inference": "통과 폭 제한.", "action": "서행", "limits": "작업자 유무 확인 불가.", "confidence": null, "abstain_reason": null}, "review": {"reviewer": "검수자A·B", "evidence_ok": null, "note": "GT 미확정. 채점 제외, 사유 공개."}}]};</script>
+<script>
+const {run, taxonomy, cases} = DATA;
+const ERR = Object.fromEntries(taxonomy.error_types.map(e=>[e.id,e]));
+const FAC = Object.fromEntries(taxonomy.factors.map(f=>[f.id,f]));
+// ---- state (what travels between screens) ----
+const state = { view:'summary', filters:{error:[], factor:null}, caseId:null, uiState:'normal' };
+function go(view, patch={}){ Object.assign(state, patch); state.view=view; location.hash=view; render(); }
+window.addEventListener('hashchange',()=>{const v=location.hash.replace('#','');if(['summary','cases','detail'].includes(v)&&v!==state.view){state.view=v;render();}});
+document.querySelectorAll('.statebar button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.statebar button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.uiState=b.dataset.state;render();});
+
+// ---- helpers ----
+const pct=v=>v==null?'미측정':(v*100).toFixed(1)+'%';
+const frac=m=>m.numerator!=null?`${m.numerator} / ${m.denominator}`:'';
+const pill=(t,c='')=>`<span class="pill ${c}">${t}</span>`;
+const errPill=id=>{const e=ERR[id];const cls=['miss','false_alarm','hallucination'].includes(id)?'err':['abstain','failure','label_review'].includes(id)?'warn':'neutral';return pill(e.label,cls);};
+const judg=j=>j==null?pill('판정 없음','dim'):j==='위험'?pill('위험','err'):pill('안전','gt');
+const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function filtered(){
+  return cases.filter(c=>{
+    if(state.filters.factor && !(c.gt.factors.includes(state.filters.factor))) return false;
+    if(state.filters.error.length===0) return c.error_types.some(e=>e!=='label_review');
+    return state.filters.error.some(e=>c.error_types.includes(e));
+  });
+}
+// ---- placeholder scene drawing (not a real photo) ----
+function scene(c, w=320, h=200){
+  const night=c.conditions.includes('야간');
+  const sky=night?'#2b3040':'#cfd8e0', road=night?'#4a4f58':'#8d9aa6', wall=night?'#3a3e48':'#b9b3a6';
+  const o=c.gt.objects; let objs='';
+  const car=(x,y,s,side)=>`<rect x="${x}" y="${y}" width="${34*s}" height="${18*s}" rx="3" fill="#5b6773" stroke="#2c333b"/>`;
+  const ped=(x,y,s,col='#d94a3d')=>`<circle cx="${x}" cy="${y}" r="${5*s}" fill="${col}"/><rect x="${x-4*s}" y="${y+5*s}" width="${8*s}" height="${16*s}" rx="2" fill="${col}"/>`;
+  let pc=0,cc=0;
+  o.forEach(ob=>{
+    if(ob==='주차 차량'){objs+=car(cc%2?70:216,120+cc*8,1,cc%2);cc++;}
+    else if(ob==='맞은편 차량'){objs+=car(150,105,.8);}
+    else if(ob==='보행자'){objs+=ped(150+pc*22,118,1);pc++;}
+    else if(ob==='어린이'){objs+=`<rect x="236" y="118" width="30" height="22" fill="${road}"/>`+ped(222,126,.6,'#e3a12f');}
+    else if(ob==='적치물'){objs+=`<rect x="190" y="110" width="80" height="40" fill="#e0a33a" stroke="#8a5a00"/><line x1="190" y1="110" x2="270" y2="150" stroke="#8a5a00"/>`;}
+  });
+  if(c.sample_id==='S-004') objs+=`<rect x="226" y="86" width="6" height="60" fill="#6a6a6a"/><rect x="60" y="130" width="22" height="16" fill="#5a8a4a"/>`;
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="가상 장면: ${esc(c.scene)}">
+  <rect width="${w}" height="${h}" fill="${sky}"/>
+  <rect x="0" y="60" width="${w}" height="${h}" fill="${wall}"/>
+  <polygon points="130,60 190,60 ${w},${h} 0,${h}" fill="${road}"/>
+  ${objs}
+  ${night?`<circle cx="60" cy="40" r="10" fill="#ffd97a" opacity=".8"/><rect x="0" y="60" width="${w}" height="${h}" fill="#000" opacity=".35"/>`:''}
+  <text x="6" y="${h-6}" font-size="9" fill="#fff" opacity=".8" font-family="monospace">placeholder · ${c.sample_id}</text>
+</svg>`;
+}
+// ---- crumbs ----
+function crumbs(){
+  const parts=[`<b>${run.run_label}</b>`,`<span class="mono">${run.run_id}</span>`];
+  if(state.view!=='summary'){const f=[...state.filters.error.map(e=>ERR[e].label)];if(state.filters.factor)f.push(FAC[state.filters.factor].label);parts.push('/ '+(f.length?f.join(' · '):'오류 전체'));}
+  if(state.view==='detail'&&state.caseId)parts.push('/ '+state.caseId);
+  document.getElementById('crumbs').innerHTML=parts.join(' ');
+  ['st1','st2','st3'].forEach((id,i)=>document.getElementById(id).classList.toggle('cur',['summary','cases','detail'][i]===state.view));
+}
+// ---- render ----
+function render(){
+  crumbs();
+  const app=document.getElementById('app');
+  if(state.uiState==='loading'){app.innerHTML=`<div class="section"><div class="skel" style="width:40%"></div><div class="grid cols-4">${'<div class="card"><div class="skel" style="width:50%"></div><div class="skel" style="margin-top:10px;height:26px"></div></div>'.repeat(4)}</div><div class="skel" style="width:70%"></div><div class="skel"></div></div>`;return;}
+  if(state.uiState==='apierror'){app.innerHTML=`<div class="notice err"><b>평가 결과를 불러오지 못했습니다.</b> GET /runs/${run.run_id} 응답 503. 네트워크 상태를 확인한 뒤 다시 시도하세요. <button onclick="document.querySelector('[data-state=normal]').click()">다시 시도</button></div>`;return;}
+  if(state.uiState==='empty'){app.innerHTML=`<div class="empty"><b>저장된 평가 실행이 없습니다.</b><br>결과 파일(run.json + cases.json)을 가져오면 요약이 표시됩니다.<br><br><button class="primary">결과 파일 가져오기</button></div>`;return;}
+  ({summary:renderSummary,cases:renderCases,detail:renderDetail})[state.view]();
+  window.scrollTo({top:0});
+}
+function statCard(label,m,extra=''){
+  const unm=m.value==null;
+  return `<div class="card stat"><div class="label">${label}</div><div class="val num ${unm?'unm':''}">${unm?'미측정':pct(m.value)}</div><div class="sub">${unm?esc(m.note||m.status):frac(m)+(m.note?' · '+esc(m.note):'')}${extra}</div></div>`;
+}
+function countCard(label,n,err,sub=''){
+  return `<div class="card stat clickable" onclick="go('cases',{filters:{error:['${err}'],factor:null}})"><div class="label">${label}</div><div class="val num">${n}</div><div class="sub">${sub||'클릭 → F2 목록'}</div></div>`;
+}
+function renderSummary(){
+  const m=run.metrics,ec=run.error_counts,cn=run.counts;
+  document.getElementById('app').innerHTML=`
+  <div class="section">
+    <div class="card" style="display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center">
+      <label>평가 실행 <select id="runsel">
+        <option>${run.run_label} · ${run.model.model_label}</option>
+        ${run.other_runs.map(r=>`<option disabled>${r.model_label} — 미실행</option>`).join('')}
+      </select></label>
+      <span class="mono muted">데이터 ${run.dataset.dataset_id} · 라벨 ${run.dataset.label_version} · taxonomy ${run.dataset.taxonomy_version} · 프롬프트 ${run.model.prompt_version} · 채점 ${run.scorer.scorer_version}</span>
+      ${pill('mock','mock')}
+    </div>
+    <div class="notice info">양성 기준: ${esc(run.scorer.positive_rule)} · ${esc(run.scorer.abstain_rule)}. 이 요약은 운행 확대 여부를 판정하지 않습니다.</div>
+  </div>
+
+  <div class="section">
+    <h3>위험 판정 (M1)</h3>
+    <div class="grid cols-4">
+      ${statCard('위험 Recall (보수적)',m.risk_recall_conservative)}
+      ${statCard('위험 Recall (응답 사례만)',m.risk_recall_answered_only)}
+      ${statCard('위험 Precision',m.risk_precision)}
+      <div class="card stat"><div class="label">표본</div><div class="val num">${cn.scored}<span class="muted" style="font-size:14px"> / ${cn.attempted}</span></div><div class="sub">채점 ${cn.scored} · 양성 ${cn.gt_positive} · 음성 ${cn.gt_negative} · 재검토 제외 ${cn.excluded_label_review}</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>오류 건수 — 클릭하면 해당 조건의 목록으로</h3>
+    <div class="grid cols-4">
+      ${countCard('미탐 (GT 위험 → 안전)',ec.miss,'miss')}
+      ${countCard('오경보 (GT 안전 → 위험)',ec.false_alarm,'false_alarm')}
+      ${countCard('행동 오류',ec.action,'action')}
+      ${countCard('객체 오류',ec.object,'object')}
+      ${countCard('근거 오류',ec.evidence,'evidence')}
+      ${countCard('환각',ec.hallucination,'hallucination')}
+      ${countCard('판단 보류',ec.abstain,'abstain','모델이 스스로 보류')}
+      ${countCard('형식 오류·호출 실패',ec.failure,'failure','백엔드 실행 상태')}
+    </div>
+    <div class="muted" style="font-size:12px">한 사례가 여러 오류를 가질 수 있어 합계(${Object.values(ec).filter(v=>typeof v==='number').slice(0,-1).reduce((a,b)=>a+b,0)}) ≠ 오류 사례 수(<span class="cnt" onclick="go('cases',{filters:{error:[],factor:null}})">${ec.cases_with_any_error}</span>). 라벨 재검토 ${ec.label_review}건은 채점 제외.</div>
+  </div>
+
+  <div class="section">
+    <h3>그 외 지표 (M3 · M4 · M5 · M2 · M7 · M6)</h3>
+    <div class="grid cols-3">
+      ${statCard('환각률',m.hallucination_rate)}
+      ${statCard('행동 정확도',m.action_accuracy)}
+      ${statCard('schema 통과율',m.schema_pass_rate)}
+      ${statCard('객체 인식 F1',m.object_f1)}
+      ${statCard('근거 품질',m.evidence_quality)}
+      ${statCard('지연 p50',m.latency_p50_ms)}
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>위험 요인별 — 행 클릭 시 해당 요인으로 필터</h3>
+    <div class="card tablewrap"><table>
+      <tr><th>요인</th><th class="num">n</th><th class="num">TP</th><th class="num">미탐</th><th class="num">오경보</th><th class="num">보류</th><th class="num">실패</th><th class="num">Recall</th><th class="num">Precision</th><th>비고</th></tr>
+      ${run.by_factor.map(f=>`<tr class="row" onclick="go('cases',{filters:{error:[],factor:'${f.factor_id}'}})"><td>${f.factor_id} ${f.factor_label}</td><td class="num">${f.n}</td><td class="num">${f.tp}</td><td class="num">${f.fn}</td><td class="num">${f.fp}</td><td class="num">${f.abstain}</td><td class="num">${f.failure}</td><td class="num">${f.recall==null?'<span class="muted">—</span>':pct(f.recall)}</td><td class="num">${f.precision==null?'<span class="muted">—</span>':pct(f.precision)}</td><td class="muted">${esc(f.note||'')}</td></tr>`).join('')}
+    </table></div>
+    <div class="muted" style="font-size:12px">표본이 작아 신뢰구간을 계산하지 않았습니다. 순위만으로 개선 우선순위를 확정하지 않습니다.</div>
+  </div>
+
+  <div class="section"><div class="spec">
+    <b>F1 백엔드 요구:</b> <code>GET /runs</code> (목록: run_id, run_label, model_label, dataset_id, data_kind) · <code>GET /runs/{run_id}/summary</code> (metrics·counts·error_counts·by_factor 위 run.json 구조) · 미측정은 <code>null + status:"unmeasured"</code>, 0으로 보내지 않음.
+  </div></div>`;
+}
+function renderCases(){
+  const list=filtered();
+  const errBtn=id=>`<button class="${state.filters.error.includes(id)?'on':''}" onclick="toggleErr('${id}')">${ERR[id].label}</button>`;
+  document.getElementById('app').innerHTML=`
+  <div class="section">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button onclick="go('summary')">← F1 요약으로</button><h2>오류 사례 목록</h2><span class="muted num">${list.length}건</span></div>
+    <div class="card" style="display:grid;gap:8px">
+      <div class="filters"><span class="lbl">오류 유형</span>${taxonomy.error_types.map(e=>errBtn(e.id)).join('')}<button onclick="state.filters.error=[];render()" class="muted">전체 오류</button></div>
+      <div class="filters"><span class="lbl">위험 요인</span><select id="facsel" onchange="state.filters.factor=this.value||null;render()"><option value="">전체</option>${taxonomy.factors.map(f=>`<option value="${f.id}" ${state.filters.factor===f.id?'selected':''}>${f.id} ${f.label}</option>`).join('')}</select>
+      <span class="lbl" style="margin-left:8px">정렬</span><select><option>오류 유형 → sample_id</option><option disabled>confidence (미정)</option></select></div>
+    </div>
+    ${list.length===0?`<div class="empty">조건에 맞는 사례가 없습니다. 필터를 해제해 보세요.</div>`:`
+    <div class="card tablewrap"><table>
+      <tr><th>이미지</th><th>sample_id</th><th>장면 (가상)</th><th>GT 판정</th><th>예측 판정</th><th>오류 유형</th><th>요인</th><th>상태</th></tr>
+      ${list.map(c=>`<tr class="row" onclick="go('detail',{caseId:'${c.sample_id}'})">
+        <td><div class="thumb">${scene(c,72,48)}</div></td>
+        <td class="mono">${c.sample_id}</td>
+        <td style="min-width:180px">${esc(c.scene)}</td>
+        <td>${c.status==='label_review'?pill('재검토 대기','warn'):judg(c.gt.judgment)}</td>
+        <td>${c.pred?judg(c.pred.judgment):pill('없음 (실패)','dim')}</td>
+        <td>${c.error_types.map(errPill).join(' ')||'<span class="muted">—</span>'}</td>
+        <td class="mono">${c.gt.factors.join(', ')}</td>
+        <td class="mono muted">${c.status}</td></tr>`).join('')}
+    </table></div>`}
+  </div>
+  <div class="section"><div class="spec">
+    <b>F2 백엔드 요구:</b> <code>GET /runs/{run_id}/cases?error_type=miss,hallucination&factor=F2&status=&page=1&size=50</code> → 각 행: sample_id, thumbnail_url, scene(선택), gt.judgment, pred.judgment, error_types[], gt.factors[], status. 페이지네이션은 200장 이상이면 필요. 정렬 기준은 confidence 정의 후 추가.
+  </div></div>`;
+}
+function toggleErr(id){const a=state.filters.error;const i=a.indexOf(id);i>=0?a.splice(i,1):a.push(id);render();}
+function renderDetail(){
+  const list=filtered(); let idx=list.findIndex(c=>c.sample_id===state.caseId);
+  const c=cases.find(x=>x.sample_id===state.caseId)||list[0]; if(!c){go('cases');return;}
+  const p=c.pred,g=c.gt;
+  const dd=v=>v==null||(Array.isArray(v)&&v.length===0)?'<dd class="empty">미등록</dd>':`<dd>${Array.isArray(v)?v.map(esc).join(', '):esc(v)}</dd>`;
+  const cmp=(()=>{
+    if(c.status==='label_review')return `<div class="notice">GT 미확정: ${esc(g.review_reason)} — 채점에서 제외되었고 제외 사유를 공개합니다.</div>`;
+    if(c.status==='format_error'||c.status==='call_failed')return `<div class="notice err"><b>${c.failure.code}</b> ${esc(c.failure.message)} · 재시도 ${c.failure.retry_count}회 · ${c.failure.retryable?'재시도 가능':'재시도 불가'}. 모델 판단 보류와는 다른 상태입니다. <button>재시도 요청</button></div><details><summary>원본 응답 일부</summary><pre class="mono" style="white-space:pre-wrap">${esc(c.raw_response_excerpt)}</pre></details>`;
+    if(c.status==='abstain')return `<div class="notice">판단 보류 · 사유: ${esc(p.abstain_reason)} · 부족한 정보: ${esc(p.limits)}. '낮은 위험'으로 해석하지 않으며, 보수적 집계에서는 미검출로 포함됩니다.</div>`;
+    const same=g.judgment===p.judgment;
+    return `<div class="notice ${same?'info':'err'}"><b>판정 ${same?'일치':'불일치'}</b> · ${c.error_types.length?c.error_types.map(errPill).join(' '):'기록된 오류 없음'}${same&&c.error_types.length?' — 판정이 맞아도 근거까지 맞다는 뜻은 아닙니다. 아래 근거를 따로 읽으세요.':''}</div>`;
+  })();
+  document.getElementById('app').innerHTML=`
+  <div class="section">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button onclick="go('cases')">← 목록으로 (필터 유지)</button>
+      <h2 class="mono">${c.sample_id}</h2>${c.conditions.map(t=>pill(t,'dim')).join('')}${pill('mock','mock')}
+      <span style="margin-left:auto;display:flex;gap:6px"><button ${idx<=0?'disabled':''} onclick="go('detail',{caseId:'${list[idx-1]?.sample_id}'})">← 이전</button><span class="muted num" style="align-self:center">${idx+1} / ${list.length}</span><button ${idx>=list.length-1?'disabled':''} onclick="go('detail',{caseId:'${list[idx+1]?.sample_id}'})">다음 →</button></span>
+    </div>
+    ${cmp}
+    <div class="grid cols-2" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)">
+      <div class="wrapcol">
+        <div class="scene" id="scene">${scene(c)}<span class="tag pill mock">가상 이미지 · 실제 사진 아님</span><div class="zoom"><button onclick="zoomScene(1.5)">+</button><button onclick="zoomScene(1)">1:1</button></div></div>
+        <div class="muted" style="font-size:12px;margin-top:6px">${esc(c.scene)}. bbox 오버레이(GT/예측 구분)는 좌표 규약 협의 후 추가.</div>
+      </div>
+      <div class="card wrapcol">
+        <h3>검수 결과</h3>
+        ${c.review?`<dl class="kv"><dt>검수자</dt><dd>${esc(c.review.reviewer)}</dd><dt>근거 적절</dt><dd>${c.review.evidence_ok==null?'<span class="muted">검수 보류</span>':c.review.evidence_ok?pill('적절','gt'):pill('부적절','err')}</dd><dt>메모</dt><dd>${esc(c.review.note)}</dd></dl>`:'<p class="muted">검수 기록 없음</p>'}
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button>검토 메모 추가</button><button>오류 유형 수정</button><button disabled>다른 모델 결과 비교 (미실행)</button></div>
+      </div>
+    </div>
+    <div class="cmp">
+      <div class="col gt"><h2>${pill('GT','gt')} 사람이 검수한 정답</h2>
+        <dl class="kv"><dt>판정</dt><dd>${judg(g.judgment)} ${g.risk_level?pill(g.risk_level,'dim'):''}</dd>
+        <dt>위험 요인</dt>${dd(g.factors.map(f=>f+' '+FAC[f].label))}
+        <dt>관측 객체</dt>${dd(g.objects)}
+        <dt>근거</dt>${dd(g.evidence)}
+        <dt>허용 행동</dt>${dd(g.allowed_actions)}</dl>
+        <div class="muted" style="font-size:12px;margin-top:8px">라벨 ${run.dataset.label_version} · taxonomy ${run.dataset.taxonomy_version}</div>
+      </div>
+      <div class="col pred"><h2>${pill('예측','pred')} 모델 출력 <span class="muted" style="font-weight:400;font-size:12px">${run.model.model_label}</span></h2>
+        ${p?`<dl class="kv"><dt>판정</dt><dd>${judg(p.judgment)} ${p.risk_level?pill(p.risk_level,'dim'):''}</dd>
+        <dt>위험 요인</dt>${dd(p.factors.map(f=>f+' '+FAC[f].label))}
+        <dt>관측 객체</dt>${dd(p.objects)}
+        <dt>관측 사실</dt>${dd(p.observed)}
+        <dt>추론</dt>${dd(p.inference)}
+        <dt>권장 행동</dt>${dd(p.action)}
+        <dt>판단 한계</dt>${dd(p.limits)}
+        <dt>confidence</dt><dd><span class="pill warn">미정</span> <span class="muted" style="font-size:12px">산출·보정 방법 확정 전. 사고 확률이 아님.</span></dd></dl>`:'<p class="muted">출력 없음 (실행 실패)</p>'}
+      </div>
+    </div>
+  </div>
+  <div class="section"><div class="spec">
+    <b>F3 백엔드 요구:</b> <code>GET /runs/{run_id}/cases/{sample_id}</code> → image_url(원본, 확대용 고해상도), gt{judgment,risk_level,factors[],objects[],evidence,allowed_actions[]}, pred{…,observed,inference,action,limits,confidence:null,abstain_reason}, status, failure{code,message,retry_count}, review{reviewer,evidence_ok,note}, error_types[]. <code>POST …/review</code> (메모·오류 유형 저장). 이전/다음은 F2와 같은 필터 쿼리로 계산.
+  </div></div>`;
+}
+let z=1;function zoomScene(f){z=f;const s=document.querySelector('#scene svg');s.style.transform=`scale(${z})`;s.style.transformOrigin='center';}
+const v0=location.hash.replace('#','');if(['summary','cases','detail'].includes(v0))state.view=v0;if(state.view==='detail'&&!state.caseId)state.caseId='S-002';
+render();
+</script>

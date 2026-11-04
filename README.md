@@ -9,7 +9,7 @@
 
 | 경로 | 내용 |
 |---|---|
-| `prototype/index.html` | 클릭 가능한 HTML 프로토타입 (단일 파일, 브라우저에서 바로 열림) |
+| `prototype/index.html` | 클릭 가능한 HTML 프로토타입 (단일 파일, 브라우저에서 바로 열림, GitHub Pages 배포 가능) |
 | `mock/run.json` | F1 요약용 — 실행 1건의 지표·오류 건수·요인별 표 |
 | `mock/cases.json` | F2 목록·F3 상세용 — 사례 12건 (GT·예측·검수·오류 유형·상태) |
 | `mock/taxonomy.json` | 공통 enum — 위험 요인 F1~F5, 오류 유형, 판정·행동 값 |
@@ -18,6 +18,8 @@
 mock 3개는 백엔드 API 응답 형식 **제안**이다. 모든 사례는 같은 `run_id`로 연결된다.
 
 ## 화면
+
+- **F0 추론** — Hugging Face 모델 ID 입력(프리셋: Qwen3-VL, Kanana, HyperCLOVAX) + 이미지 업로드 → 실행 → 구조화 출력(판정·요인·관측·추론·행동·한계). 결과를 평가 실행에 저장. 실제 호출은 백엔드가 수행(현재는 mock).
 
 - **F1 평가 요약** — 실행·모델·데이터 버전, 위험 Recall(보수적/응답 사례만)·Precision, 오류 건수 8칸(미탐·오경보·행동·객체·근거·환각·보류·실패), 요인별 표. 건수 클릭 → F2.
 - **F2 오류 사례 목록** — 오류 유형·요인 필터, 썸네일 + GT 판정 + 예측 판정. 행 클릭 → F3. F1에서 온 필터와 `run_id` 유지.
@@ -38,6 +40,8 @@ mock 3개는 백엔드 API 응답 형식 **제안**이다. 모든 사례는 같�
 ## 백엔드 요구 (초안)
 
 ```
+POST /infer                      { model_id, prompt_version, schema_version, image } → job_id
+GET  /infer/{job_id}             status · output · raw_response · latency_ms · failure
 GET  /runs
 GET  /runs/{run_id}/summary
 GET  /runs/{run_id}/cases?error_type=&factor=&status=&page=&size=

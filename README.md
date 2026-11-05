@@ -1,63 +1,56 @@
 # alley-risk-viewer
 
-보도 없는 생활도로 위험 판단 VLM의 **평가 결과 뷰어** (프론트엔드).
-백엔드가 저장한 평가 결과를 읽어 **평가 요약 → 오류 사례 목록 → 사례 상세** 3화면으로 보여주고, 사람이 검수한 정답(GT)과 모델 예측을 나란히 비교한다.
+보도 없는 생활도로 VLM 평가 Benchmark의 **Web Viewer** (프론트엔드). 명세서(Role_Frontend) 기준.
+점수 → 실패 장면 → 판단 근거로 내려가는 흐름을 제공하고, 정답과 예측을 구분해 **근거 Object → 관계 판정(R1–R4) → 대응**의 연결을 보여 준다.
 
-> 현재 상태: 가상(mock) 데이터로 흐름만 동작하는 프로토타입. 실제 구현(React)은 백엔드 JSON 구조 합의 후 진행.
-
-## 구성
-
-| 경로 | 내용 |
-|---|---|
-| `prototype/index.html` | 클릭 가능한 HTML 프로토타입 (단일 파일, 브라우저에서 바로 열림, GitHub Pages 배포 가능) |
-| `mock/run.json` | F1 요약용 — 실행 1건의 지표·오류 건수·요인별 표 |
-| `mock/cases.json` | F2 목록·F3 상세용 — 사례 12건 (GT·예측·검수·오류 유형·상태) |
-| `mock/taxonomy.json` | 공통 enum — 위험 요인 F1~F5, 오류 유형, 판정·행동 값 |
-| `docs/plan-draft-2026-11-01.md` | 11/1 구현 계획 초안 (화면 흐름·API 요구·예외 상태·일정) |
-
-mock 3개는 백엔드 API 응답 형식 **제안**이다. 모든 사례는 같은 `run_id`로 연결된다.
+> 현재 상태: 가상(mock) 데이터로 F1–F5와 상태 화면이 동작하는 단일 HTML 프로토타입. React 구현은 2주차 Schema 확정 후.
 
 ## 화면
 
-- **F0 추론** — Hugging Face 모델 ID 입력(프리셋: Qwen3-VL, Kanana, HyperCLOVAX) + 이미지 업로드 → 실행 → 구조화 출력(판정·요인·관측·추론·행동·한계). 결과를 평가 실행에 저장. 실제 호출은 백엔드가 수행(현재는 mock).
+| 화면 | 답하는 질문 | 보여 주는 것 |
+|---|---|---|
+| F1 평가 실행 | 어떤 모델·Test Version으로 실행하는가 | HF 모델 ID, Test Version(frozen), 입력 조건(정상/영상 없음), 진행률, 성공·실패 수, V1·V2 |
+| F2 결과 Report | Base 대비 개선되었는가 | V5·V10 + 분모 + 95% CI, 차이 구간과 판정(improved / not_confirmed), 진단 지표군 4개, 조건별 점수(탐색적 표시) |
+| F3 오류 목록 | 어떤 장면에서 어떤 종류로 틀렸는가 | 진단 지표군·관계·조건 필터, 실패 사유 이름표(형식 오류/필요 대응 누락/금지 대응/등록되지 않은 대응/관계 모순) |
+| F4 모델 비교 | 같은 장면에서 두 모델이 어떻게 다른가 | Base/Tuned 관계 판정과 대응 나란히, 통과/실패 |
+| F5 장면 상세 | 이 판단의 근거는 무엇인가 | C·정답 Box(실선)·예측 Box(점선) 레이어, GT 체인 / 예측 체인, Box 짝짓기(IoU), 정답 출처·검수 상태 |
 
-- **F1 평가 요약** — 실행·모델·데이터 버전, 위험 Recall(보수적/응답 사례만)·Precision, 오류 건수 8칸(미탐·오경보·행동·객체·근거·환각·보류·실패), 요인별 표. 건수 클릭 → F2.
-- **F2 오류 사례 목록** — 오류 유형·요인 필터, 썸네일 + GT 판정 + 예측 판정. 행 클릭 → F3. F1에서 온 필터와 `run_id` 유지.
-- **F3 사례 상세** — 원본 이미지(확대), 판정 일치/불일치 띠, 좌 GT 열 | 우 예측 열(관측 사실·추론·행동·판단 한계 분리), 검수 결과. 이전/다음은 F2 필터 안에서 이동, "목록으로"는 필터 유지.
+상태 화면: 평가 전(→F1) · 실행 중(진행률·남은 요청) · 실행 오류(실패 수·재실행) · Invalid 장면 · 필터 결과 없음(초기화).
 
-## 표시 원칙
+## 표시 규칙 (명세 §5)
 
-- GT와 모델 예측은 시각적으로 분리한다. 판정이 맞아도 근거가 맞다는 뜻은 아니다.
-- 값이 없으면 `미등록`, confidence는 산출 방법 확정 전까지 `미정`, 미측정 지표는 `0`이 아니라 `미측정`.
-- 판단 보류는 사유와 함께 표시하고 "낮은 위험"으로 바꾸지 않는다.
-- 가상 데이터는 항상 `가상 데이터` 뱃지로 표시한다.
+- 정답 Box·C는 사람이 작성, 예측 Box는 모델 출력. 선 모양과 범례로 구분. C는 모델에 제공되지 않음을 범례에 명시.
+- **P/A/U**: P 성립, A 충분히 확인했고 불성립, U 입력만으로 판정 불가. U는 정답의 하나이므로 오류 색을 쓰지 않는다.
+- 빈 값: **Invalid**(출력 형식 오류) / **Missing**(검수 전 정답) / **Not applicable** 을 서로 다른 표기로.
+- 실패 사유는 색만이 아니라 이름표와 함께.
+- 점수는 분모와 95% CI를 함께. 개선은 차이 구간 하한 > 0일 때만 "개선", 아니면 "차이를 확인하지 못함". 판정 값은 Report API를 그대로 따른다.
+- 분모가 작은 조건별 점수는 "탐색적 결과".
 
-## 예외 상태
+## 파일
 
-로딩 / 빈 결과 / 조회 실패 / 이미지 없음 / 추론 실패·형식 오류 / 판단 보류 / 라벨 재검토 / 미실행 모델 / 필터 0건.
-프로토타입 상단 "예외 상태 미리보기" 버튼으로 일부 확인 가능.
+| 경로 | 내용 |
+|---|---|
+| `prototype/index.html` | 단일 HTML 프로토타입 (GitHub Pages 배포 가능) |
+| `mock/report.json` | Report API 응답 제안 — core, comparison, diagnostics, conditions, excluded, runs |
+| `mock/scenes.json` | 장면별 reference·predictions(base/tuned)·scoring |
+| `mock/meta.json` | 관계·대응 Code·실패 사유·진단 지표군 enum |
+| `mock/gen.py` | mock 생성 스크립트 (채점 로직 포함, 백엔드 채점기와 맞춰야 함) |
+| `docs/plan-draft-2026-11-01.md` | 11/1 구현 계획 초안 |
 
 ## 백엔드 요구 (초안)
 
 ```
-POST /infer                      { model_id, prompt_version, schema_version, image } → job_id
-GET  /infer/{job_id}             status · output · raw_response · latency_ms · failure
-GET  /runs
-GET  /runs/{run_id}/summary
-GET  /runs/{run_id}/cases?error_type=&factor=&status=&page=&size=
-GET  /runs/{run_id}/cases/{sample_id}
-POST /runs/{run_id}/cases/{sample_id}/review
+GET  /tests                                   frozen Test Version 목록
+POST /runs                                    { model_id, test_version, input_condition, prompt_version, schema_version }
+GET  /runs/{run_id}                           status, progress, V1, V2, failures[]
+POST /runs/{run_id}/retry                     실패 요청만 재실행
+GET  /reports?test=&base=&target=             core, comparison(verdict), diagnostics, conditions, excluded
+GET  /runs/{run_id}/scenes?status=fail&diag=&relation=&condition=
+GET  /scenes/{scene_id}?run=|runs=a,b         reference, prediction(s), scoring
 ```
-
-응답 구조는 `mock/*.json` 참고. 미측정은 `null + status:"unmeasured"`, `error_types`는 배열, `status`(실행 상태)와 `abstain_reason`(모델 보류)은 분리.
 
 ## 다음 단계
 
-1. React + Vite + TypeScript 뼈대, mock JSON 타입 정의
-2. F1 → F2 → F3 순으로 구현, 필터는 URL 쿼리에 보존
-3. 예외 상태 9종
-4. 백엔드 API 연결 (fetch 경로만 교체)
-
-## 미정 사항
-
-confidence 표시 방식 · 위험 등급 경계 · 허용 행동 집합 · bbox 좌표 규약 · 보류/실패 집계 규칙 · 이미지 사용 조건 · 웹 추론 실행 버튼 포함 여부(MLOps 범위)
+1. 2주차: 위 필드 목록을 백엔드와 확정
+2. 3주차: React + Vite + TS로 F1–F5·상태 화면 구현 (필터는 URL 쿼리, mock → API 교체)
+3. 4주차: 실제 Base·Tuned 결과 연결, 정답·예측 Box와 근거–관계–대응 연결 표시

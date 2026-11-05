@@ -1,0 +1,226 @@
+{
+  "_note": "가상 데이터. 신뢰구간·V5는 형식 확인용 임의 값. 판정(verdict)은 Report API 값을 그대로 표시하며 화면에서 계산하지 않는다.",
+  "test_version": "test-v0.1 (frozen 2026-11-04)",
+  "n_scenes": 12,
+  "n_scored": 11,
+  "n_source_groups": 5,
+  "excluded": {
+    "count": 1,
+    "reasons": {
+      "정답 검수 미완료 (Missing)": 1
+    }
+  },
+  "models": {
+    "base": {
+      "id": "Qwen/Qwen3-VL-8B-Instruct",
+      "label": "Base",
+      "desc": "미세조정 전",
+      "run_id": "run_base_test-v0.1"
+    },
+    "tuned": {
+      "id": "team1/qwen3-vl-8b-alley-lora",
+      "label": "Tuned",
+      "desc": "LoRA 미세조정",
+      "run_id": "run_tuned_test-v0.1"
+    }
+  },
+  "core": {
+    "V5": {
+      "label": "V5 Relation Macro-F1",
+      "base": {
+        "value": 0.61,
+        "ci": [
+          0.49,
+          0.72
+        ],
+        "n": 11
+      },
+      "tuned": {
+        "value": 0.86,
+        "ci": [
+          0.77,
+          0.94
+        ],
+        "n": 11
+      }
+    },
+    "V10": {
+      "label": "V10 Action Pass Rate",
+      "base": {
+        "value": 0.36,
+        "ci": [
+          0.14,
+          0.61
+        ],
+        "n": 11,
+        "k": 4
+      },
+      "tuned": {
+        "value": 0.91,
+        "ci": [
+          0.59,
+          0.98
+        ],
+        "n": 11,
+        "k": 10
+      }
+    }
+  },
+  "comparison": {
+    "V5": {
+      "diff": 0.25,
+      "ci": [
+        0.09,
+        0.4
+      ],
+      "verdict": "improved"
+    },
+    "V10": {
+      "diff": 0.55,
+      "ci": [
+        -0.02,
+        0.66
+      ],
+      "verdict": "not_confirmed"
+    }
+  },
+  "diagnostics": {
+    "evidence": {
+      "label": "근거",
+      "metrics": "V3 · V4",
+      "desc": "근거 Object 누락 · 없는 Object 단정",
+      "base": {
+        "fail_scenes": 4
+      },
+      "tuned": {
+        "fail_scenes": 0
+      }
+    },
+    "bias": {
+      "label": "판단 편향",
+      "metrics": "V6–V9",
+      "desc": "관계 판정 오류 (P↔A, U 처리)",
+      "base": {
+        "fail_scenes": 6
+      },
+      "tuned": {
+        "fail_scenes": 0
+      }
+    },
+    "action": {
+      "label": "대응 결함",
+      "metrics": "V11 · V12",
+      "desc": "필요 대응 누락 · 금지 대응",
+      "base": {
+        "fail_scenes": 7
+      },
+      "tuned": {
+        "fail_scenes": 1
+      }
+    },
+    "explain": {
+      "label": "설명 오류",
+      "metrics": "V13 · V14",
+      "desc": "관측 불가 사실 단정 · 근거-판정 불연결",
+      "base": {
+        "fail_scenes": 3
+      },
+      "tuned": {
+        "fail_scenes": 0
+      }
+    }
+  },
+  "conditions": [
+    {
+      "label": "야간",
+      "n": 1,
+      "base": {
+        "v5": 0.25,
+        "ci": [
+          0.0,
+          0.75
+        ]
+      },
+      "tuned": {
+        "v5": 1.0,
+        "ci": [
+          0.4,
+          1.0
+        ]
+      }
+    },
+    {
+      "label": "보도 없음",
+      "n": 11,
+      "base": {
+        "v5": 0.61,
+        "ci": [
+          0.49,
+          0.72
+        ]
+      },
+      "tuned": {
+        "v5": 0.86,
+        "ci": [
+          0.77,
+          0.94
+        ]
+      }
+    },
+    {
+      "label": "일방통행",
+      "n": 2,
+      "base": {
+        "v5": 0.5,
+        "ci": [
+          0.0,
+          1.0
+        ]
+      },
+      "tuned": {
+        "v5": 1.0,
+        "ci": [
+          0.3,
+          1.0
+        ]
+      }
+    }
+  ],
+  "exploratory_threshold": 20,
+  "runs": [
+    {
+      "run_id": "run_base_test-v0.1",
+      "model": "base",
+      "status": "done",
+      "requests": 12,
+      "ok": 11,
+      "failed": 1,
+      "V1_schema_valid": 0.9166666666666666,
+      "V2_coverage": 0.9166666666666666,
+      "input_condition": "정상 영상",
+      "finished_at": "2026-11-04T21:10:00+09:00"
+    },
+    {
+      "run_id": "run_tuned_test-v0.1",
+      "model": "tuned",
+      "status": "done",
+      "requests": 12,
+      "ok": 12,
+      "failed": 0,
+      "V1_schema_valid": 1.0,
+      "V2_coverage": 1.0,
+      "input_condition": "정상 영상",
+      "finished_at": "2026-11-04T22:40:00+09:00"
+    },
+    {
+      "run_id": "run_base_test-v0.1_noimage",
+      "model": "base",
+      "status": "queued",
+      "requests": 12,
+      "ok": 0,
+      "failed": 0,
+      "input_condition": "영상 없음",
+      "note": "이미지 의존도 보조 실험"
+    }
+  ]
+}

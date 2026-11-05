@@ -1,0 +1,3295 @@
+{
+  "test_version": "test-v0.1 (frozen 2026-11-04)",
+  "scenes": [
+    {
+      "scene_id": "S-0001",
+      "conditions": [
+        "주간",
+        "보도 없음"
+      ],
+      "scene": "보행자 2명이 통행 경로 중앙을 걷고 있음",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "보행자",
+            "kind": "Actor",
+            "box": [
+              0.44,
+              0.5,
+              0.5,
+              0.72
+            ]
+          },
+          {
+            "id": "o2",
+            "label": "보행자",
+            "kind": "Actor",
+            "box": [
+              0.51,
+              0.49,
+              0.57,
+              0.71
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "P",
+            "targets": [
+              "o1",
+              "o2"
+            ]
+          },
+          "R2": {
+            "value": "A",
+            "targets": []
+          },
+          "R3": {
+            "value": "A",
+            "targets": []
+          },
+          "R4": {
+            "value": "A",
+            "targets": []
+          }
+        },
+        "actions": {
+          "required": [
+            [
+              "HOLD",
+              "R1"
+            ]
+          ],
+          "allowed": [
+            [
+              "SLOW",
+              "R1"
+            ]
+          ],
+          "forbidden": [
+            [
+              "PASS",
+              "R1"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.43,
+                0.5,
+                0.51,
+                0.73
+              ]
+            },
+            {
+              "id": "o2",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.5,
+                0.48,
+                0.58,
+                0.72
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "P",
+              "targets": [
+                "o1",
+                "o2"
+              ]
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "HOLD",
+              "R1"
+            ]
+          ],
+          "explanation": "경로 중앙에 보행자 2명이 있어 보류한다.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.44,
+                0.5,
+                0.5,
+                0.72
+              ]
+            },
+            {
+              "id": "o2",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.51,
+                0.49,
+                0.57,
+                0.71
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "P",
+              "targets": [
+                "o1",
+                "o2"
+              ]
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "HOLD",
+              "R1"
+            ]
+          ],
+          "explanation": "경로 중앙에 보행자 2명. 보류.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 0.72,
+                "label_ok": true
+              },
+              {
+                "gt": "o2",
+                "pred": "o2",
+                "iou": 0.69,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              },
+              {
+                "gt": "o2",
+                "pred": "o2",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    },
+    {
+      "scene_id": "S-0002",
+      "conditions": [
+        "주간",
+        "보도 없음"
+      ],
+      "scene": "우측 주차 차량 두 대 사이로 어린이 상반신이 보임",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "주차 차량",
+            "kind": "Roadside Vehicle",
+            "box": [
+              0.62,
+              0.48,
+              0.8,
+              0.68
+            ]
+          },
+          {
+            "id": "o2",
+            "label": "주차 차량",
+            "kind": "Roadside Vehicle",
+            "box": [
+              0.8,
+              0.47,
+              0.97,
+              0.66
+            ]
+          },
+          {
+            "id": "o3",
+            "label": "어린이",
+            "kind": "Actor",
+            "box": [
+              0.76,
+              0.52,
+              0.81,
+              0.6
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "A",
+            "targets": []
+          },
+          "R2": {
+            "value": "A",
+            "targets": []
+          },
+          "R3": {
+            "value": "P",
+            "targets": [
+              "o1",
+              "o2"
+            ]
+          },
+          "R4": {
+            "value": "P",
+            "targets": [
+              "o1"
+            ]
+          }
+        },
+        "actions": {
+          "required": [
+            [
+              "PROCEED_AFTER_CHECK",
+              "R3"
+            ]
+          ],
+          "allowed": [
+            [
+              "SLOW",
+              "R4"
+            ],
+            [
+              "HOLD",
+              "R3"
+            ]
+          ],
+          "forbidden": [
+            [
+              "PASS",
+              "R3"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.61,
+                0.47,
+                0.81,
+                0.69
+              ]
+            },
+            {
+              "id": "o2",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.8,
+                0.46,
+                0.98,
+                0.67
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            }
+          },
+          "actions": [
+            [
+              "PASS",
+              "R4"
+            ]
+          ],
+          "explanation": "양측 주차 차량이 있으나 통과 폭은 충분하다. 통과.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.62,
+                0.48,
+                0.8,
+                0.68
+              ]
+            },
+            {
+              "id": "o2",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.8,
+                0.47,
+                0.97,
+                0.66
+              ]
+            },
+            {
+              "id": "o3",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.75,
+                0.51,
+                0.82,
+                0.61
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "P",
+              "targets": [
+                "o1",
+                "o2"
+              ]
+            },
+            "R4": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            }
+          },
+          "actions": [
+            [
+              "PROCEED_AFTER_CHECK",
+              "R3"
+            ],
+            [
+              "SLOW",
+              "R4"
+            ]
+          ],
+          "explanation": "주차 차량 사이에 보행자 일부가 보이고 뒤 공간은 확인 불가. 확인 후 진행.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "P",
+              "pred": "A",
+              "ok": false
+            },
+            "R4": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 0.82,
+                "label_ok": true
+              },
+              {
+                "gt": "o2",
+                "pred": "o2",
+                "iou": 0.85,
+                "label_ok": true
+              }
+            ],
+            "missed": [
+              "o3"
+            ],
+            "extra": []
+          },
+          "fail_reasons": [
+            "forbidden",
+            "missing_required"
+          ],
+          "diag": [
+            "action",
+            "bias",
+            "evidence"
+          ],
+          "pass": false,
+          "explain_ok": true,
+          "fail_labels": [
+            "금지 대응",
+            "필요 대응 누락"
+          ]
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R4": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              },
+              {
+                "gt": "o2",
+                "pred": "o2",
+                "iou": 1.0,
+                "label_ok": true
+              },
+              {
+                "gt": "o3",
+                "pred": "o3",
+                "iou": 0.57,
+                "label_ok": false
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    },
+    {
+      "scene_id": "S-0003",
+      "conditions": [
+        "주간",
+        "보도 없음"
+      ],
+      "scene": "보행자 1명이 좌측 주차 차량 바깥쪽을 걸어 경로와 겹침",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "주차 차량",
+            "kind": "Roadside Vehicle",
+            "box": [
+              0.05,
+              0.5,
+              0.26,
+              0.7
+            ]
+          },
+          {
+            "id": "o2",
+            "label": "보행자",
+            "kind": "Actor",
+            "box": [
+              0.3,
+              0.5,
+              0.36,
+              0.7
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "P",
+            "targets": [
+              "o2"
+            ]
+          },
+          "R2": {
+            "value": "A",
+            "targets": []
+          },
+          "R3": {
+            "value": "P",
+            "targets": [
+              "o1"
+            ]
+          },
+          "R4": {
+            "value": "A",
+            "targets": []
+          }
+        },
+        "actions": {
+          "required": [
+            [
+              "SLOW",
+              "R1"
+            ]
+          ],
+          "allowed": [
+            [
+              "HOLD",
+              "R1"
+            ],
+            [
+              "PROCEED_AFTER_CHECK",
+              "R3"
+            ]
+          ],
+          "forbidden": [
+            [
+              "PASS",
+              "R1"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.04,
+                0.49,
+                0.27,
+                0.71
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "P",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "SLOW",
+              "R1"
+            ]
+          ],
+          "explanation": "주택가 좁은 골목이라 보행자가 갑자기 나올 수 있어 서행한다.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.05,
+                0.5,
+                0.26,
+                0.7
+              ]
+            },
+            {
+              "id": "o2",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.29,
+                0.5,
+                0.37,
+                0.71
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "P",
+              "targets": [
+                "o2"
+              ]
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "SLOW",
+              "R1"
+            ]
+          ],
+          "explanation": "좌측 보행자가 경로와 겹친다. 서행.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "P",
+              "pred": "A",
+              "ok": false
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 0.83,
+                "label_ok": true
+              }
+            ],
+            "missed": [
+              "o2"
+            ],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [
+            "bias",
+            "evidence",
+            "explain"
+          ],
+          "pass": true,
+          "explain_ok": false,
+          "explain_note": "실제 보행자를 관측했다는 서술 없이 장소 상식만으로 판정",
+          "fail_labels": []
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              },
+              {
+                "gt": "o2",
+                "pred": "o2",
+                "iou": 0.71,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    },
+    {
+      "scene_id": "S-0004",
+      "conditions": [
+        "주간",
+        "보도 없음"
+      ],
+      "scene": "보행자·차량 없음. 전봇대와 화분만 있음",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "전봇대",
+            "kind": "Obstacle",
+            "box": [
+              0.7,
+              0.3,
+              0.73,
+              0.68
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "A",
+            "targets": []
+          },
+          "R2": {
+            "value": "A",
+            "targets": []
+          },
+          "R3": {
+            "value": "A",
+            "targets": []
+          },
+          "R4": {
+            "value": "A",
+            "targets": []
+          }
+        },
+        "actions": {
+          "required": [],
+          "allowed": [
+            [
+              "SLOW",
+              "R0"
+            ],
+            [
+              "PASS",
+              "R0"
+            ]
+          ],
+          "forbidden": [
+            [
+              "HOLD",
+              "R0"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.69,
+                0.4,
+                0.74,
+                0.68
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "HOLD",
+              "R2"
+            ]
+          ],
+          "explanation": "우측에 보행자가 서 있어 경로로 들어올 수 있다. 보류.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "PASS",
+              "R0"
+            ]
+          ],
+          "explanation": "경로 상 Actor 없음. 통과.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "P",
+              "ok": false
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [],
+            "missed": [],
+            "extra": [
+              "o1"
+            ]
+          },
+          "fail_reasons": [
+            "forbidden"
+          ],
+          "diag": [
+            "action",
+            "bias",
+            "evidence",
+            "explain"
+          ],
+          "pass": false,
+          "explain_ok": false,
+          "explain_note": "전봇대를 보행자로 단정",
+          "fail_labels": [
+            "금지 대응"
+          ]
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    },
+    {
+      "scene_id": "S-0005",
+      "conditions": [
+        "주간",
+        "보도 없음",
+        "일방통행"
+      ],
+      "scene": "보행자가 경로 한가운데 근거리에 정면으로 서 있음",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "보행자",
+            "kind": "Actor",
+            "box": [
+              0.45,
+              0.46,
+              0.55,
+              0.84
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "P",
+            "targets": [
+              "o1"
+            ]
+          },
+          "R2": {
+            "value": "A",
+            "targets": []
+          },
+          "R3": {
+            "value": "A",
+            "targets": []
+          },
+          "R4": {
+            "value": "A",
+            "targets": []
+          }
+        },
+        "actions": {
+          "required": [
+            [
+              "HOLD",
+              "R1"
+            ]
+          ],
+          "allowed": [],
+          "forbidden": [
+            [
+              "SLOW",
+              "R1"
+            ],
+            [
+              "PASS",
+              "R1"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.45,
+                0.46,
+                0.55,
+                0.84
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "SLOW",
+              "R1"
+            ]
+          ],
+          "explanation": "경로 중앙 보행자. 서행.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.45,
+                0.46,
+                0.55,
+                0.84
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "HOLD",
+              "R1"
+            ]
+          ],
+          "explanation": "경로 중앙 근거리 보행자. 보류.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [
+            "forbidden",
+            "missing_required"
+          ],
+          "diag": [
+            "action"
+          ],
+          "pass": false,
+          "explain_ok": true,
+          "fail_labels": [
+            "금지 대응",
+            "필요 대응 누락"
+          ]
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    },
+    {
+      "scene_id": "S-0006",
+      "conditions": [
+        "주간",
+        "보도 없음"
+      ],
+      "scene": "우측 주차 차량 1대, 통과 폭 충분",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "주차 차량",
+            "kind": "Roadside Vehicle",
+            "box": [
+              0.66,
+              0.5,
+              0.88,
+              0.68
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "A",
+            "targets": []
+          },
+          "R2": {
+            "value": "A",
+            "targets": []
+          },
+          "R3": {
+            "value": "A",
+            "targets": []
+          },
+          "R4": {
+            "value": "A",
+            "targets": []
+          }
+        },
+        "actions": {
+          "required": [],
+          "allowed": [
+            [
+              "SLOW",
+              "R0"
+            ],
+            [
+              "PASS",
+              "R0"
+            ]
+          ],
+          "forbidden": [
+            [
+              "HOLD",
+              "R0"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.65,
+                0.5,
+                0.89,
+                0.69
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "SLOW",
+              "R0"
+            ]
+          ],
+          "explanation": "우측 주차 1대, 좌측 여유. 서행 통과.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.66,
+                0.5,
+                0.88,
+                0.68
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "PASS",
+              "R0"
+            ]
+          ],
+          "explanation": "통과 가능.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 0.87,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    },
+    {
+      "scene_id": "S-0007",
+      "conditions": [
+        "야간",
+        "보도 없음"
+      ],
+      "scene": "야간. 우측 어두운 영역은 식별 불가, 주차 차량 1대",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "주차 차량",
+            "kind": "Roadside Vehicle",
+            "box": [
+              0.64,
+              0.5,
+              0.86,
+              0.68
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "U",
+            "targets": []
+          },
+          "R2": {
+            "value": "A",
+            "targets": []
+          },
+          "R3": {
+            "value": "P",
+            "targets": [
+              "o1"
+            ]
+          },
+          "R4": {
+            "value": "A",
+            "targets": []
+          }
+        },
+        "actions": {
+          "required": [
+            [
+              "PROCEED_AFTER_CHECK",
+              "R3"
+            ]
+          ],
+          "allowed": [
+            [
+              "HOLD",
+              "R1"
+            ],
+            [
+              "SLOW",
+              "R3"
+            ]
+          ],
+          "forbidden": [
+            [
+              "PASS",
+              "R3"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.63,
+                0.49,
+                0.87,
+                0.69
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "PASS",
+              "R0"
+            ]
+          ],
+          "explanation": "야간이지만 경로에 장애 없음. 통과.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.64,
+                0.5,
+                0.86,
+                0.68
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "U",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "PROCEED_AFTER_CHECK",
+              "R3"
+            ]
+          ],
+          "explanation": "조도 부족으로 우측 영역 판단 불가. 주차 차량 뒤 확인 후 진행.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "U",
+              "pred": "A",
+              "ok": false
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "P",
+              "pred": "A",
+              "ok": false
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 0.83,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [
+            "forbidden",
+            "missing_required"
+          ],
+          "diag": [
+            "action",
+            "bias"
+          ],
+          "pass": false,
+          "explain_ok": true,
+          "fail_labels": [
+            "금지 대응",
+            "필요 대응 누락"
+          ]
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "U",
+              "pred": "U",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    },
+    {
+      "scene_id": "S-0008",
+      "conditions": [
+        "주간",
+        "보도 없음"
+      ],
+      "scene": "맞은편 차량과 주차 차량으로 통과 폭 부족",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "맞은편 차량",
+            "kind": "Actor",
+            "box": [
+              0.44,
+              0.47,
+              0.58,
+              0.62
+            ]
+          },
+          {
+            "id": "o2",
+            "label": "주차 차량",
+            "kind": "Roadside Vehicle",
+            "box": [
+              0.08,
+              0.5,
+              0.3,
+              0.7
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "P",
+            "targets": [
+              "o1"
+            ]
+          },
+          "R2": {
+            "value": "A",
+            "targets": []
+          },
+          "R3": {
+            "value": "A",
+            "targets": []
+          },
+          "R4": {
+            "value": "P",
+            "targets": [
+              "o1",
+              "o2"
+            ]
+          }
+        },
+        "actions": {
+          "required": [
+            [
+              "HOLD",
+              "R4"
+            ]
+          ],
+          "allowed": [
+            [
+              "CHECK_PASSABILITY",
+              "R4"
+            ]
+          ],
+          "forbidden": [
+            [
+              "PASS",
+              "R4"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": false,
+          "objects": [],
+          "relations": {},
+          "actions": [],
+          "explanation": null,
+          "raw_excerpt": "{\"objects\":[{\"id\":\"o1\",\"label\":\"차량\",\"box\":[0.44,0.47,0.58"
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "맞은편 차량",
+              "kind": "Actor",
+              "box": [
+                0.44,
+                0.47,
+                0.58,
+                0.62
+              ]
+            },
+            {
+              "id": "o2",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.08,
+                0.5,
+                0.3,
+                0.7
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "P",
+              "targets": [
+                "o1",
+                "o2"
+              ]
+            }
+          },
+          "actions": [
+            [
+              "HOLD",
+              "R4"
+            ],
+            [
+              "CHECK_PASSABILITY",
+              "R4"
+            ]
+          ],
+          "explanation": "맞은편 차량 접근, 교행 공간 없음. 보류.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "pass": false,
+          "fail_reasons": [
+            "invalid"
+          ],
+          "diag": [
+            "action"
+          ],
+          "relations": {},
+          "boxes": {},
+          "explain_ok": null,
+          "fail_labels": [
+            "형식 오류"
+          ]
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              },
+              {
+                "gt": "o2",
+                "pred": "o2",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    },
+    {
+      "scene_id": "S-0009",
+      "conditions": [
+        "주간",
+        "보도 없음"
+      ],
+      "scene": "양측 주차 차량이 있으나 중앙 통과 폭 확보",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "주차 차량",
+            "kind": "Roadside Vehicle",
+            "box": [
+              0.04,
+              0.5,
+              0.24,
+              0.69
+            ]
+          },
+          {
+            "id": "o2",
+            "label": "주차 차량",
+            "kind": "Roadside Vehicle",
+            "box": [
+              0.74,
+              0.5,
+              0.95,
+              0.69
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "A",
+            "targets": []
+          },
+          "R2": {
+            "value": "A",
+            "targets": []
+          },
+          "R3": {
+            "value": "A",
+            "targets": []
+          },
+          "R4": {
+            "value": "A",
+            "targets": []
+          }
+        },
+        "actions": {
+          "required": [],
+          "allowed": [
+            [
+              "SLOW",
+              "R0"
+            ],
+            [
+              "PASS",
+              "R0"
+            ]
+          ],
+          "forbidden": [
+            [
+              "HOLD",
+              "R0"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.04,
+                0.5,
+                0.24,
+                0.69
+              ]
+            },
+            {
+              "id": "o2",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.74,
+                0.5,
+                0.95,
+                0.69
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "P",
+              "targets": [
+                "o1",
+                "o2"
+              ]
+            }
+          },
+          "actions": [
+            [
+              "HOLD",
+              "R4"
+            ]
+          ],
+          "explanation": "양측 주차로 통과 폭이 좁아 보류.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.04,
+                0.5,
+                0.24,
+                0.69
+              ]
+            },
+            {
+              "id": "o2",
+              "label": "주차 차량",
+              "kind": "Roadside Vehicle",
+              "box": [
+                0.74,
+                0.5,
+                0.95,
+                0.69
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "SLOW",
+              "R0"
+            ]
+          ],
+          "explanation": "양측 주차에도 중앙 폭 확보. 서행 통과.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "P",
+              "ok": false
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              },
+              {
+                "gt": "o2",
+                "pred": "o2",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [
+            "forbidden"
+          ],
+          "diag": [
+            "action",
+            "bias"
+          ],
+          "pass": false,
+          "explain_ok": true,
+          "fail_labels": [
+            "금지 대응"
+          ]
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              },
+              {
+                "gt": "o2",
+                "pred": "o2",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    },
+    {
+      "scene_id": "S-0010",
+      "conditions": [
+        "주간",
+        "보도 없음",
+        "일방통행"
+      ],
+      "scene": "골목 출입부 우측 모서리에 보행자. 대로로 나가려 함",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "보행자",
+            "kind": "Actor",
+            "box": [
+              0.8,
+              0.46,
+              0.86,
+              0.66
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "A",
+            "targets": []
+          },
+          "R2": {
+            "value": "P",
+            "targets": [
+              "o1"
+            ]
+          },
+          "R3": {
+            "value": "A",
+            "targets": []
+          },
+          "R4": {
+            "value": "A",
+            "targets": []
+          }
+        },
+        "actions": {
+          "required": [
+            [
+              "SLOW",
+              "R2"
+            ]
+          ],
+          "allowed": [
+            [
+              "HOLD",
+              "R2"
+            ]
+          ],
+          "forbidden": [
+            [
+              "PASS",
+              "R2"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "횡단보도",
+              "kind": "Obstacle",
+              "box": [
+                0.3,
+                0.7,
+                0.7,
+                0.8
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "PASS",
+              "R0"
+            ]
+          ],
+          "explanation": "전방 횡단보도에 보행자 없음. 통과.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.79,
+                0.46,
+                0.87,
+                0.67
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "SLOW",
+              "R2"
+            ]
+          ],
+          "explanation": "출입부 우측 보행자. 서행.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "P",
+              "pred": "A",
+              "ok": false
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [],
+            "missed": [
+              "o1"
+            ],
+            "extra": [
+              "o1"
+            ]
+          },
+          "fail_reasons": [
+            "forbidden",
+            "missing_required"
+          ],
+          "diag": [
+            "action",
+            "bias",
+            "evidence"
+          ],
+          "pass": false,
+          "explain_ok": true,
+          "fail_labels": [
+            "금지 대응",
+            "필요 대응 누락"
+          ]
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 0.71,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": true,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    },
+    {
+      "scene_id": "S-0011",
+      "conditions": [
+        "주간",
+        "보도 없음"
+      ],
+      "scene": "합류부, 보행자가 벽면에 붙어 경로 밖에 서 있음",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "보행자",
+            "kind": "Actor",
+            "box": [
+              0.9,
+              0.48,
+              0.95,
+              0.66
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "A",
+            "targets": []
+          },
+          "R2": {
+            "value": "A",
+            "targets": []
+          },
+          "R3": {
+            "value": "A",
+            "targets": []
+          },
+          "R4": {
+            "value": "A",
+            "targets": []
+          }
+        },
+        "actions": {
+          "required": [],
+          "allowed": [
+            [
+              "SLOW",
+              "R0"
+            ],
+            [
+              "PASS",
+              "R0"
+            ]
+          ],
+          "forbidden": [
+            [
+              "HOLD",
+              "R0"
+            ]
+          ]
+        }
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.9,
+                0.48,
+                0.95,
+                0.66
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "SLOW",
+              "R0"
+            ]
+          ],
+          "explanation": "보행자가 벽 옆에 멈춰 서서 차량을 기다리고 있다. 서행.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "보행자",
+              "kind": "Actor",
+              "box": [
+                0.9,
+                0.48,
+                0.95,
+                0.66
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "A",
+              "targets": []
+            },
+            "R4": {
+              "value": "A",
+              "targets": []
+            }
+          },
+          "actions": [
+            [
+              "YIELD",
+              "R0"
+            ]
+          ],
+          "explanation": "보행자 경로 밖. 양보 후 진행.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Reviewed",
+      "excluded": null,
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [
+            "explain"
+          ],
+          "pass": true,
+          "explain_ok": false,
+          "explain_note": "'멈춰 서서 기다리고 있다'는 정지 이미지로 관측 불가한 동작 단정",
+          "fail_labels": []
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R3": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R4": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [
+            "unregistered"
+          ],
+          "diag": [
+            "action"
+          ],
+          "pass": false,
+          "explain_ok": true,
+          "fail_labels": [
+            "등록되지 않은 대응"
+          ]
+        }
+      }
+    },
+    {
+      "scene_id": "S-0012",
+      "conditions": [
+        "주간",
+        "보도 없음"
+      ],
+      "scene": "공사 적치물이 우측 절반을 막음. 작업자 유무 불명확",
+      "C": [
+        [
+          0.42,
+          0.52
+        ],
+        [
+          0.58,
+          0.52
+        ],
+        [
+          0.92,
+          1.0
+        ],
+        [
+          0.08,
+          1.0
+        ]
+      ],
+      "reference": {
+        "objects": [
+          {
+            "id": "o1",
+            "label": "적치물",
+            "kind": "Obstacle",
+            "box": [
+              0.55,
+              0.45,
+              0.95,
+              0.7
+            ]
+          }
+        ],
+        "relations": {
+          "R1": {
+            "value": "A",
+            "targets": []
+          },
+          "R2": null,
+          "R3": null,
+          "R4": {
+            "value": "P",
+            "targets": [
+              "o1"
+            ]
+          }
+        },
+        "actions": null
+      },
+      "predictions": {
+        "base": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "적치물",
+              "kind": "Obstacle",
+              "box": [
+                0.55,
+                0.45,
+                0.95,
+                0.7
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "U",
+              "targets": []
+            },
+            "R4": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            }
+          },
+          "actions": [
+            [
+              "SLOW",
+              "R4"
+            ]
+          ],
+          "explanation": "우측 적치물. 서행.",
+          "raw_excerpt": null
+        },
+        "tuned": {
+          "valid": true,
+          "objects": [
+            {
+              "id": "o1",
+              "label": "적치물",
+              "kind": "Obstacle",
+              "box": [
+                0.55,
+                0.45,
+                0.95,
+                0.7
+              ]
+            }
+          ],
+          "relations": {
+            "R1": {
+              "value": "A",
+              "targets": []
+            },
+            "R2": {
+              "value": "A",
+              "targets": []
+            },
+            "R3": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            },
+            "R4": {
+              "value": "P",
+              "targets": [
+                "o1"
+              ]
+            }
+          },
+          "actions": [
+            [
+              "PROCEED_AFTER_CHECK",
+              "R3"
+            ],
+            [
+              "SLOW",
+              "R4"
+            ]
+          ],
+          "explanation": "적치물 뒤 작업자 유무 확인 불가. 확인 후 진행.",
+          "raw_excerpt": null
+        }
+      },
+      "source": "사진",
+      "review_status": "Missing",
+      "excluded": "정답 검수 미완료 (Missing)",
+      "scoring": {
+        "base": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": null,
+              "pred": "A",
+              "ok": null
+            },
+            "R3": {
+              "gt": null,
+              "pred": "U",
+              "ok": null
+            },
+            "R4": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": null,
+          "explain_ok": true,
+          "fail_labels": []
+        },
+        "tuned": {
+          "relations": {
+            "R1": {
+              "gt": "A",
+              "pred": "A",
+              "ok": true
+            },
+            "R2": {
+              "gt": null,
+              "pred": "A",
+              "ok": null
+            },
+            "R3": {
+              "gt": null,
+              "pred": "P",
+              "ok": null
+            },
+            "R4": {
+              "gt": "P",
+              "pred": "P",
+              "ok": true
+            }
+          },
+          "boxes": {
+            "matched": [
+              {
+                "gt": "o1",
+                "pred": "o1",
+                "iou": 1.0,
+                "label_ok": true
+              }
+            ],
+            "missed": [],
+            "extra": []
+          },
+          "fail_reasons": [],
+          "diag": [],
+          "pass": null,
+          "explain_ok": true,
+          "fail_labels": []
+        }
+      }
+    }
+  ]
+}

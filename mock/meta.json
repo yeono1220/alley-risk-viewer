@@ -1,0 +1,66 @@
+{
+  "relations": {
+    "R1": {
+      "label": "점유",
+      "q": "C 안에 대상이 있는가"
+    },
+    "R2": {
+      "label": "출입구",
+      "q": "C와 이어지는 출입구 주변에 Actor가 있는가"
+    },
+    "R3": {
+      "label": "시야 가림",
+      "q": "필요한 영역이 가려졌는가"
+    },
+    "R4": {
+      "label": "통행 제한",
+      "q": "통행 공간이 좁아졌는가"
+    }
+  },
+  "actions": {
+    "HOLD": "보류",
+    "PROCEED_AFTER_CHECK": "확인 후 진행",
+    "CHECK_PASSABILITY": "통과 가능성 확인",
+    "SLOW": "서행",
+    "PASS": "통과"
+  },
+  "fail_reasons": {
+    "invalid": "형식 오류",
+    "missing_required": "필요 대응 누락",
+    "forbidden": "금지 대응",
+    "unregistered": "등록되지 않은 대응",
+    "contradiction": "관계 판정과의 모순"
+  },
+  "diagnostics": {
+    "evidence": {
+      "label": "근거",
+      "metrics": "V3 · V4",
+      "desc": "근거 Object 누락 · 없는 Object 단정"
+    },
+    "bias": {
+      "label": "판단 편향",
+      "metrics": "V6–V9",
+      "desc": "관계 판정 오류 (P↔A, U 처리)"
+    },
+    "action": {
+      "label": "대응 결함",
+      "metrics": "V11 · V12",
+      "desc": "필요 대응 누락 · 금지 대응"
+    },
+    "explain": {
+      "label": "설명 오류",
+      "metrics": "V13 · V14",
+      "desc": "관측 불가 사실 단정 · 근거-판정 불연결"
+    }
+  },
+  "pau": {
+    "P": "성립 근거 있음",
+    "A": "충분히 확인했고 성립하지 않음",
+    "U": "입력만으로 판정할 수 없음 (정답의 하나, 오류 아님)"
+  },
+  "empty_values": {
+    "Invalid": "모델 출력 형식 오류",
+    "Missing": "아직 검수하지 않은 정답",
+    "Not applicable": "해당 장면에 적용되지 않는 질문"
+  }
+}

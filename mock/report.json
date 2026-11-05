@@ -1,59 +1,71 @@
 {
-  "_note": "가상 데이터. 신뢰구간·V5는 형식 확인용 임의 값. 판정(verdict)은 Report API 값을 그대로 표시하며 화면에서 계산하지 않는다.",
+  "_note": "가상 데이터. V5·신뢰구간·verdict는 형식 확인용 임의 값(Group Bootstrap 미실행). 화면은 verdict를 계산하지 않고 Report API 값을 그대로 표시한다.",
   "test_version": "test-v0.1 (frozen 2026-11-04)",
-  "n_scenes": 12,
-  "n_scored": 11,
+  "label_version": "L0.2",
+  "scorer_commit": "a1b2c3d",
+  "n_scenes": 13,
+  "n_relation": 12,
+  "n_action": 11,
   "n_source_groups": 5,
   "excluded": {
-    "count": 1,
-    "reasons": {
-      "정답 검수 미완료 (Missing)": 1
+    "relation": {
+      "count": 1,
+      "reasons": {
+        "정답 검수 미완료 (Draft/Missing)": 1
+      }
+    },
+    "action": {
+      "count": 2,
+      "reasons": {
+        "정답 검수 미완료 (Draft/Missing)": 1,
+        "방향 충돌 (Direction Match = Conflicting)": 1
+      }
     }
   },
   "models": {
     "base": {
-      "id": "Qwen/Qwen3-VL-8B-Instruct",
+      "id": "google/gemma-4-12b-it",
       "label": "Base",
-      "desc": "미세조정 전",
+      "desc": "Gemma 4 12B · Zero-shot",
       "run_id": "run_base_test-v0.1"
     },
     "tuned": {
-      "id": "team1/qwen3-vl-8b-alley-lora",
+      "id": "team1/gemma-4-12b-alley-lora",
       "label": "Tuned",
-      "desc": "LoRA 미세조정",
+      "desc": "Gemma 4 12B · LoRA",
       "run_id": "run_tuned_test-v0.1"
     }
   },
   "core": {
     "V5": {
       "label": "V5 Relation Macro-F1",
+      "n": 12,
       "base": {
-        "value": 0.61,
+        "value": 0.58,
         "ci": [
-          0.49,
-          0.72
-        ],
-        "n": 11
+          0.45,
+          0.7
+        ]
       },
       "tuned": {
-        "value": 0.86,
+        "value": 0.87,
         "ci": [
-          0.77,
-          0.94
-        ],
-        "n": 11
-      }
+          0.78,
+          0.95
+        ]
+      },
+      "note": "12칸 중 정답 0개 칸 있음 → Supported-class Macro-F1로 보고"
     },
     "V10": {
       "label": "V10 Action Pass Rate",
+      "n": 11,
       "base": {
-        "value": 0.36,
+        "value": 0.27,
         "ci": [
-          0.14,
+          0.15,
           0.61
         ],
-        "n": 11,
-        "k": 4
+        "k": 3
       },
       "tuned": {
         "value": 0.91,
@@ -61,36 +73,35 @@
           0.59,
           0.98
         ],
-        "n": 11,
         "k": 10
       }
     }
   },
   "comparison": {
     "V5": {
-      "diff": 0.25,
+      "diff": 0.29,
       "ci": [
-        0.09,
-        0.4
+        0.12,
+        0.44
       ],
       "verdict": "improved"
     },
     "V10": {
-      "diff": 0.55,
+      "diff": 0.64,
       "ci": [
         -0.02,
-        0.66
+        0.68
       ],
       "verdict": "not_confirmed"
     }
   },
   "diagnostics": {
     "evidence": {
-      "label": "근거",
+      "label": "근거 정합성",
       "metrics": "V3 · V4",
-      "desc": "근거 Object 누락 · 없는 Object 단정",
+      "desc": "Box 짝짓기(IoU≥0.5) 실패 · 근거 ID 불일치",
       "base": {
-        "fail_scenes": 4
+        "fail_scenes": 5
       },
       "tuned": {
         "fail_scenes": 0
@@ -99,7 +110,7 @@
     "bias": {
       "label": "판단 편향",
       "metrics": "V6–V9",
-      "desc": "관계 판정 오류 (P↔A, U 처리)",
+      "desc": "있는 관계 놓침 · 없는 관계 단정 · U 처리",
       "base": {
         "fail_scenes": 6
       },
@@ -112,22 +123,68 @@
       "metrics": "V11 · V12",
       "desc": "필요 대응 누락 · 금지 대응",
       "base": {
-        "fail_scenes": 7
+        "fail_scenes": 8
       },
       "tuned": {
         "fail_scenes": 1
       }
     },
     "explain": {
-      "label": "설명 오류",
+      "label": "설명문 환각",
       "metrics": "V13 · V14",
-      "desc": "관측 불가 사실 단정 · 근거-판정 불연결",
+      "desc": "근거 없이 단정한 진술",
       "base": {
         "fail_scenes": 3
       },
       "tuned": {
         "fail_scenes": 0
       }
+    }
+  },
+  "diag_scores": {
+    "V6": {
+      "label": "V6 Recall for Present",
+      "base": [
+        4,
+        8
+      ],
+      "tuned": [
+        10,
+        10
+      ]
+    },
+    "V7": {
+      "label": "V7 False Positive Rate",
+      "base": [
+        2,
+        35
+      ],
+      "tuned": [
+        0,
+        37
+      ]
+    },
+    "V11": {
+      "label": "V11 Required Action Coverage",
+      "base": [
+        3,
+        15
+      ],
+      "tuned": [
+        14,
+        15
+      ]
+    },
+    "V12": {
+      "label": "V12 Forbidden Action Rate",
+      "base": [
+        3,
+        11
+      ],
+      "tuned": [
+        0,
+        11
+      ]
     }
   },
   "conditions": [
@@ -151,25 +208,25 @@
     },
     {
       "label": "보도 없음",
-      "n": 11,
+      "n": 12,
       "base": {
-        "v5": 0.61,
+        "v5": 0.58,
         "ci": [
-          0.49,
-          0.72
+          0.45,
+          0.7
         ]
       },
       "tuned": {
-        "v5": 0.86,
+        "v5": 0.87,
         "ci": [
-          0.77,
-          0.94
+          0.78,
+          0.95
         ]
       }
     },
     {
       "label": "일방통행",
-      "n": 2,
+      "n": 3,
       "base": {
         "v5": 0.5,
         "ci": [
@@ -192,31 +249,35 @@
       "run_id": "run_base_test-v0.1",
       "model": "base",
       "status": "done",
-      "requests": 12,
-      "ok": 11,
+      "requests": 13,
+      "ok": 12,
       "failed": 1,
-      "V1_schema_valid": 0.9166666666666666,
-      "V2_coverage": 0.9166666666666666,
+      "V1_schema_valid": 0.923,
+      "V2_invalid": 0.077,
       "input_condition": "정상 영상",
+      "prompt": "p0.1",
+      "seed": 7,
       "finished_at": "2026-11-04T21:10:00+09:00"
     },
     {
       "run_id": "run_tuned_test-v0.1",
       "model": "tuned",
       "status": "done",
-      "requests": 12,
-      "ok": 12,
+      "requests": 13,
+      "ok": 13,
       "failed": 0,
       "V1_schema_valid": 1.0,
-      "V2_coverage": 1.0,
+      "V2_invalid": 0.0,
       "input_condition": "정상 영상",
+      "prompt": "p0.1",
+      "seed": 7,
       "finished_at": "2026-11-04T22:40:00+09:00"
     },
     {
       "run_id": "run_base_test-v0.1_noimage",
       "model": "base",
       "status": "queued",
-      "requests": 12,
+      "requests": 13,
       "ok": 0,
       "failed": 0,
       "input_condition": "영상 없음",

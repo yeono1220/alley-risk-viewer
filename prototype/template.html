@@ -1,0 +1,366 @@
+<title>생활도로 VLM 평가 뷰어</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: left rail F1–F5 + content column (max 1200). Semantic colors are fixed by the spec: GT green (solid), 예측 violet (dashed), C red region; P/A/U are judgments, never error-colored; pass/fail carry text labels. */
+:root{
+  --bg:#f4f3f0; --panel:#ffffff; --panel-2:#faf9f7; --fg:#1b1d20; --muted:#71757c; --line:#e3e1dc; --line-2:#cfccc4;
+  --accent:#1d4f8c; --accent-soft:#e6edf7; --accent-ink:#ffffff;
+  --gt:#2a6b43; --gt-soft:#e2f0e6; --pred:#6b3fa0; --pred-soft:#ede5f6; --c:#c2402f; --c-soft:rgba(194,64,47,.14);
+  --pass:#2a6b43; --pass-soft:#e2f0e6; --fail:#b3362f; --fail-soft:#f9e5e3; --warn:#946200; --warn-soft:#fbf0d4;
+  --u:#4a5d78; --u-soft:#e7ecf3;
+  --mock:#b15a00; --mock-soft:#ffe9d2;
+  --font:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141618; --panel:#1d2024; --panel-2:#22262b; --fg:#e8e6e1; --muted:#9b9fa6; --line:#2e3238; --line-2:#3f444c;
+  --accent:#86aee6; --accent-soft:#1d2a3f; --accent-ink:#0f1419;
+  --gt:#86cc9a; --gt-soft:#1c2f23; --pred:#c7a3ee; --pred-soft:#2c2139; --c:#f08a7a; --c-soft:rgba(240,138,122,.18);
+  --pass:#86cc9a; --pass-soft:#1c2f23; --fail:#f0918a; --fail-soft:#3a2321; --warn:#e4b65e; --warn-soft:#382d15;
+  --u:#9fb4d1; --u-soft:#25303f; --mock:#f2a65f; --mock-soft:#3a2b19; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141618; --panel:#1d2024; --panel-2:#22262b; --fg:#e8e6e1; --muted:#9b9fa6; --line:#2e3238; --line-2:#3f444c;
+  --accent:#86aee6; --accent-soft:#1d2a3f; --accent-ink:#0f1419;
+  --gt:#86cc9a; --gt-soft:#1c2f23; --pred:#c7a3ee; --pred-soft:#2c2139; --c:#f08a7a; --c-soft:rgba(240,138,122,.18);
+  --pass:#86cc9a; --pass-soft:#1c2f23; --fail:#f0918a; --fail-soft:#3a2321; --warn:#e4b65e; --warn-soft:#382d15;
+  --u:#9fb4d1; --u-soft:#25303f; --mock:#f2a65f; --mock-soft:#3a2b19; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
+h1{font-size:17px}h2{font-size:14.5px}
+h3{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:500}
+a{color:var(--accent)}
+button,select,input[type=text]{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line-2);border-radius:7px;padding:6px 11px}
+button{cursor:pointer}button:hover{border-color:var(--accent)}button:disabled{opacity:.5;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:500}
+button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+button.ghost{background:transparent;border-color:transparent;color:var(--muted)}button.ghost:hover{color:var(--accent)}
+button.sm{padding:4px 10px;font-size:12.5px}
+.shell{display:grid;grid-template-columns:204px minmax(0,1fr);gap:28px;max-width:1260px;margin:0 auto}
+@media (max-width:860px){.shell{grid-template-columns:1fr;gap:12px}}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start;display:flex;flex-direction:column;gap:4px;padding-top:20px}
+@media (max-width:860px){.rail{position:static;flex-direction:row;flex-wrap:wrap;padding-top:12px}}
+.brand{padding:0 10px 14px;display:grid;gap:6px}.brand .t{font-weight:600;font-size:15px}
+.rail a.nav{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:7px;color:var(--muted);text-decoration:none;font-size:13.5px}
+.rail a.nav .k{font-family:var(--mono);font-size:11px;width:22px;color:var(--muted)}
+.rail a.nav:hover{background:var(--panel)}
+.rail a.nav.cur{background:var(--panel);color:var(--fg);box-shadow:inset 3px 0 0 var(--accent)}.rail a.nav.cur .k{color:var(--accent)}
+.railfoot{margin-top:18px;padding:0 10px;display:grid;gap:6px;font-size:11.5px;color:var(--muted)}
+.main{padding-top:20px;display:grid;gap:20px;min-width:0;align-content:start}
+.head{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.head .crumb{font-size:12.5px;color:var(--muted)}.head .crumb b{color:var(--fg);font-weight:500}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:500;white-space:nowrap;line-height:1.5}
+.pill.mock{background:var(--mock-soft);color:var(--mock)}
+.pill.gt{background:var(--gt-soft);color:var(--gt)}.pill.pred{background:var(--pred-soft);color:var(--pred)}
+.pill.pass{background:var(--pass-soft);color:var(--pass)}.pill.fail{background:var(--fail-soft);color:var(--fail)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.neutral{background:var(--accent-soft);color:var(--accent)}
+.pill.dim{background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
+.pill.P{background:var(--fg);color:var(--bg)}.pill.A{background:var(--panel-2);color:var(--muted);border:1px solid var(--line-2)}.pill.U{background:var(--u-soft);color:var(--u)}
+.pill.na{background:transparent;color:var(--muted);border:1px dashed var(--line-2)}
+.mono{font-family:var(--mono);font-size:12px}.num{font-variant-numeric:tabular-nums}.muted{color:var(--muted)}.small{font-size:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}.card.flat{background:var(--panel-2)}
+.section{display:grid;gap:10px}.grid{display:grid;gap:10px}
+.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.cols-4,.cols-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.cols-4,.cols-3,.cols-2{grid-template-columns:1fr}}
+.stat{display:grid;gap:2px;padding:14px 16px}.stat .label{font-size:12px;color:var(--muted)}
+.stat .val{font-size:26px;font-weight:600;line-height:1.15;letter-spacing:-.01em}.stat .sub{font-size:11.5px;color:var(--muted);margin-top:4px}
+.stat.click{cursor:pointer}.stat.click:hover{border-color:var(--accent)}.stat.click .val{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11.5px;color:var(--muted);font-weight:500;letter-spacing:.03em}tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}.tablewrap{overflow-x:auto}
+tr.row{cursor:pointer}tr.row:hover td{background:var(--panel-2)}tr.row.on td{background:var(--accent-soft)}
+.cnt{color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.filters .lbl{font-size:12px;color:var(--muted);min-width:64px}
+.notice{border-left:3px solid var(--warn);background:var(--warn-soft);padding:9px 13px;border-radius:0 7px 7px 0;font-size:13px}
+.notice.fail{border-color:var(--fail);background:var(--fail-soft)}.notice.info{border-color:var(--accent);background:var(--accent-soft)}.notice.pass{border-color:var(--pass);background:var(--pass-soft)}
+.empty{padding:44px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line-2);border-radius:var(--r);display:grid;gap:10px;justify-items:center}
+details.dev{font-size:12px;color:var(--muted)}details.dev summary{cursor:pointer;list-style:none;display:inline-flex;gap:6px;align-items:center}
+details.dev summary::before{content:"›";display:inline-block;transition:transform .12s}details.dev[open] summary::before{transform:rotate(90deg)}
+details.dev .body{margin-top:8px;padding:10px 12px;background:var(--panel-2);border-radius:7px;line-height:1.6}
+details.dev code{font-family:var(--mono);font-size:11px;background:var(--accent-soft);color:var(--accent);padding:0 5px;border-radius:3px}
+.skel{height:14px;border-radius:4px;background:linear-gradient(90deg,var(--line),var(--panel),var(--line));background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.ci{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+.verdict{font-weight:600}.verdict.improved{color:var(--pass)}.verdict.not_confirmed{color:var(--muted)}
+.sp{flex:1}.wrapcol{min-width:0}
+.scene{position:relative;aspect-ratio:16/10;max-width:100%;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#8d9aa6}
+.scene svg{display:block;width:100%;height:100%}
+.scene .tag{position:absolute;top:10px;left:10px}
+.layers{position:absolute;right:10px;top:10px;display:flex;gap:4px}.layers button{padding:2px 8px;font-size:11.5px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:18px;height:11px;border:2px solid;margin-right:5px;vertical-align:-1px;border-radius:2px}
+.legend i.c{border-color:var(--c);background:var(--c-soft);border-style:dashed}.legend i.g{border-color:var(--gt)}.legend i.p{border-color:var(--pred);border-style:dashed}
+.chain{display:grid;gap:6px}.chain .step{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--panel);display:grid;gap:6px}
+.chain .step.gt{border-color:var(--gt)}.chain .step.pred{border-color:var(--pred)}.chain .step.last{background:var(--panel-2)}
+.chain .arrow{text-align:center;color:var(--muted);line-height:1}
+.chain .t{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:flex;gap:6px;align-items:center}
+.kv{display:grid;grid-template-columns:72px 1fr;gap:6px 10px;font-size:13px;margin:0}.kv dt{color:var(--muted)}.kv dd{margin:0;min-width:0}
+.rels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}@media (max-width:600px){.rels{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rel{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:grid;gap:4px;font-size:12.5px;background:var(--panel)}
+.rel .n{font-family:var(--mono);font-size:11px;color:var(--muted)}.rel .vs{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media (max-width:860px){.cmp{grid-template-columns:1fr}}
+.col{border-radius:var(--r);padding:16px;border:1px solid var(--line);background:var(--panel);min-width:0;position:relative}
+.col::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.col.gt::before{background:var(--gt)}.col.pred::before{background:var(--pred)}.col.a::before{background:var(--accent)}.col.b::before{background:var(--pred)}
+.col h2{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.field{display:grid;gap:5px}.field label{font-size:12px;color:var(--muted)}.field input[type=text],.field select{width:100%}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line-2);display:inline-block;margin-right:6px}
+.dot.run{background:var(--accent);animation:pulse 1s infinite}.dot.ok{background:var(--pass)}.dot.err{background:var(--fail)}.dot.q{background:var(--warn)}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.skel,.dot.run{animation:none}.bar i{transition:none}}
+.actlist{display:grid;gap:4px}.actlist .a,.a{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.code{font-family:var(--mono);font-size:11px;color:var(--muted)}
+</style>
+
+<div class="shell">
+  <nav class="rail">
+    <div class="brand"><div class="t">생활도로 VLM 평가 뷰어</div><span class="pill mock">가상 데이터</span></div>
+    <a class="nav" href="#run" data-v="run"><span class="k">F1</span>평가 실행</a>
+    <a class="nav" href="#report" data-v="report"><span class="k">F2</span>결과 Report</a>
+    <a class="nav" href="#errors" data-v="errors"><span class="k">F3</span>오류 목록</a>
+    <a class="nav" href="#compare" data-v="compare"><span class="k">F4</span>모델 비교</a>
+    <a class="nav" href="#scene" data-v="scene"><span class="k">F5</span>장면 상세</a>
+    <div class="railfoot">
+      <div>Test <span class="mono" id="railtest"></span></div>
+      <div>Base = 미세조정 전 · Tuned = LoRA. 모든 화면은 같은 Test Version에 고정.</div>
+      <details class="dev"><summary>상태 화면 미리보기</summary><div class="body" style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="sm on" data-state="normal">정상</button><button class="sm" data-state="before">평가 전</button><button class="sm" data-state="running">실행 중</button><button class="sm" data-state="runerror">실행 오류</button></div></details>
+    </div>
+  </nav>
+  <main class="main" id="app"></main>
+</div>
+
+<script>
+const DATA=__DATA__;
+const {report, scenes, meta} = DATA;
+const M=report.models, REL=meta.relations, ACT=meta.actions, COND=meta.conditions, DIAG=meta.diagnostics, ATTR=meta.scene_attrs;
+const VIEWS=['run','report','errors','compare','scene'];
+const state={view:'report', model:'base', filters:{diag:[], rel:null, cond:null}, sceneId:null, uiState:'normal', layers:{c:true,gt:true,pred:true},
+  run:{model:M.base.id, test:report.test_version, cond:'정상 영상', status:'idle', done:0, failed:0, total:report.n_scenes}};
+function go(view, patch={}){Object.assign(state,patch);state.view=view;if(location.hash!=='#'+view)location.hash=view;render();}
+window.addEventListener('hashchange',()=>{const v=location.hash.replace('#','');if(VIEWS.includes(v)&&v!==state.view){state.view=v;render();}});
+document.querySelectorAll('[data-state]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-state]').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.uiState=b.dataset.state;render();});
+
+const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const pill=(t,c='')=>`<span class="pill ${c}">${t}</span>`;
+const pau=v=>v==null?pill('Not applicable','na'):pill(v,v);
+const f2=v=>v==null?'—':v.toFixed(2);
+const ci=o=>`<span class="ci">[${f2(o.ci[0])}, ${f2(o.ci[1])}]</span>`;
+const mlabel=m=>M[m].label;
+const actLabel=code=>ACT[code]?ACT[code]:`${esc(code)} <span class="pill fail">등록되지 않음</span>`;
+const condLabel=c=>COND[c]||`${esc(c)} <span class="pill fail">등록되지 않음</span>`;
+const actPair=a=>{const code=Array.isArray(a)?a[0]:a.code,cond=Array.isArray(a)?a[1]:a.condition,bo=Array.isArray(a)?null:a.based_on;return `<span class="a"><b>${actLabel(code)}</b><span class="code">${condLabel(cond)}${bo&&bo.length?' · based_on '+bo.join(','):''}</span></span>`;};
+const objLabel=o=>`<span class="mono">${o.id}</span> ${esc(o.class)}${o.placement?` <span class="pill dim">${o.placement}</span>`:''}${o.kind?` <span class="muted small">${o.kind}</span>`:''}`;
+const scored=scenes.filter(s=>!s.missing);
+const actScenes=scored.filter(s=>s.reference.actions);
+const sceneAttrs=sc=>Object.entries(ATTR).map(([k,l])=>`<span class="small"><span class="muted">${l}</span> ${pau(sc[k]==='Not applicable'?null:sc[k])}</span>`).join(' &nbsp; ');
+function dev(title,body){return `<details class="dev"><summary>${title}</summary><div class="body">${body}</div></details>`;}
+function head(crumb){return `<div class="head"><span class="crumb"><b>${esc(report.test_version)}</b> · 관계 n=${report.n_relation} · 대응 n=${report.n_action} · ${report.n_source_groups} Source Group${crumb?' · '+crumb:''}</span><span class="sp"></span>${pill('mock','mock')}</div>`;}
+
+/* ---- scene drawing: placeholder backdrop + C + boxes (normalized coords) ---- */
+function sceneSVG(sc, m, opts={}){
+  const W=640,H=400, night=sc.conditions.includes('야간');
+  const sky=night?'#2b3040':'#cfd8e0', road=night?'#4a4f58':'#8d9aa6', wall=night?'#3a3e48':'#b9b3a6';
+  const L=opts.layers||state.layers;
+  const px=b=>[b[0]*W,b[1]*H,(b[2]-b[0])*W,(b[3]-b[1])*H];
+  let g='';
+  sc.reference.objects.forEach(o=>{const [x,y,w,h]=px(o.bbox);const ped=o.class==='pedestrian';const col=ped?'#d94a3d':o.kind==='Obstacle'?'#8a7a5a':'#5b6773';g+=`<rect x="${x+w*.15}" y="${y+h*.1}" width="${w*.7}" height="${h*.85}" rx="${ped?w*.3:4}" fill="${col}" opacity=".9"/>`;});
+  let c='';if(L.c){c=`<polygon points="${sc.C.map(p=>p[0]*W+','+p[1]*H).join(' ')}" fill="var(--c-soft)" stroke="var(--c)" stroke-width="2" stroke-dasharray="6 4"/><text x="${sc.C[3][0]*W+10}" y="${H-10}" font-size="13" font-weight="600" fill="var(--c)">C</text>`;}
+  let gt='';if(L.gt){sc.reference.regions.forEach(o=>{const [x,y,w,h]=px(o.bbox);gt+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--gt-soft)" fill-opacity=".45" stroke="var(--gt)" stroke-width="1.5" stroke-dasharray="2 3"/><text x="${x+3}" y="${y+13}" font-size="11" font-weight="600" fill="var(--gt)">${o.id} ${esc(o.class)}</text>`;});sc.reference.objects.forEach(o=>{const [x,y,w,h]=px(o.bbox);gt+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="var(--gt)" stroke-width="2.5"/><text x="${x+3}" y="${y-5}" font-size="12" font-weight="600" fill="var(--gt)">${o.id}</text>`;});}
+  let pr='';const p=sc.predictions[m];if(L.pred&&p&&p.valid){p.regions.forEach(o=>{const [x,y,w,h]=px(o.bbox);pr+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="var(--pred)" stroke-width="1.5" stroke-dasharray="2 3"/><text x="${x+w-3}" y="${y+13}" font-size="11" font-weight="600" text-anchor="end" fill="var(--pred)">${o.id}′</text>`;});p.objects.forEach(o=>{const [x,y,w,h]=px(o.bbox);pr+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="var(--pred)" stroke-width="2.5" stroke-dasharray="7 4"/><text x="${x+w-3}" y="${y+h+14}" font-size="12" font-weight="600" text-anchor="end" fill="var(--pred)">${o.id}′</text>`;});}
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="가상 장면 ${esc(sc.scene_id)}">
+  <rect width="${W}" height="${H}" fill="${sky}"/><rect y="${H*.3}" width="${W}" height="${H}" fill="${wall}"/>
+  <polygon points="${W*.42},${H*.3} ${W*.58},${H*.3} ${W},${H} 0,${H}" fill="${road}"/>
+  ${night?`<rect width="${W}" height="${H}" fill="#000" opacity=".35"/>`:''}${g}${c}${gt}${pr}
+  <text x="8" y="${H-8}" font-size="10" fill="#fff" opacity=".7" font-family="monospace">placeholder · 실제 사진 아님</text></svg>`;
+}
+function sceneBox(sc,m){return `<div class="scene">${sceneSVG(sc,m)}<span class="tag pill mock">가상 이미지</span>
+  <div class="layers"><button class="${state.layers.c?'on':''}" onclick="tl('c')">C</button><button class="${state.layers.gt?'on':''}" onclick="tl('gt')">정답</button><button class="${state.layers.pred?'on':''}" onclick="tl('pred')">예측</button></div></div>
+  <div class="legend"><span><i class="c"></i>C (Driving Area)</span><span><i class="g"></i>정답 Box (실선) · Region (점)</span><span><i class="p"></i>예측 Box (점선)</span><span class="sp"></span><span>C는 정답 작성과 채점에만 사용하며 모델에는 제공하지 않음</span></div>`;}
+function tl(k){state.layers[k]=!state.layers[k];render();}
+
+/* ---- filtering for F3 ---- */
+function failing(m){return scored.filter(s=>{const sc=s.scoring[m];return sc.pass===false||sc.diag.length>0;});}
+function filtered(){
+  const m=state.model,F=state.filters;
+  return failing(m).filter(s=>{
+    const sc=s.scoring[m];
+    if(F.diag.length&&!F.diag.some(d=>sc.diag.includes(d)))return false;
+    if(F.rel&&!(sc.relations[F.rel]&&sc.relations[F.rel].ok===false))return false;
+    if(F.cond&&!s.conditions.includes(F.cond))return false;
+    return true;});
+}
+
+function render(){
+  document.querySelectorAll('.rail a.nav').forEach(a=>a.classList.toggle('cur',a.dataset.v===state.view));
+  document.getElementById('railtest').textContent=report.test_version.split(' ')[0];
+  const app=document.getElementById('app');
+  if(state.view!=='run'){
+    if(state.uiState==='before'){app.innerHTML=`<div class="empty"><b>아직 평가를 실행하지 않았습니다</b><span class="small">모델과 Test Version을 골라 실행하면 결과 Report가 여기에 표시됩니다.</span><button class="primary" onclick="go('run')">F1 평가 실행으로</button></div>`;return;}
+    if(state.uiState==='running'){app.innerHTML=`<div class="card section"><div class="head"><span class="dot run"></span><b>실행 중 · ${M.tuned.label}</b><span class="muted small">${report.test_version}</span></div><div class="bar"><i style="width:58%"></i></div><div class="small muted">7 / 12 완료 · 남은 요청 5 · 예상 1분 10초 · 실패 0</div></div><div class="section"><div class="skel" style="width:40%"></div><div class="grid cols-3">${'<div class="card"><div class="skel" style="width:50%"></div><div class="skel" style="margin-top:10px;height:26px"></div></div>'.repeat(3)}</div></div>`;return;}
+    if(state.uiState==='runerror'){app.innerHTML=`<div class="notice fail"><b>실행 오류 · 3건의 요청이 실패했습니다</b> (SCHEMA_INVALID 2 · TIMEOUT 1). 실패 요청은 Invalid로 저장되었고 채점에서 제외됩니다. <button class="sm" onclick="document.querySelector('[data-state=normal]').click()">실패 요청 재실행</button></div><div class="card tablewrap" style="padding:4px 6px"><table><tr><th>scene</th><th>상태</th><th>코드</th><th>메시지</th></tr><tr><td class="mono">S-0008</td><td>${pill('Invalid','fail')}</td><td class="mono">SCHEMA_INVALID</td><td class="small">JSON 파싱 실패 (위치 41)</td></tr><tr><td class="mono">S-0011</td><td>${pill('Invalid','fail')}</td><td class="mono">SCHEMA_INVALID</td><td class="small">actions[0].code 누락</td></tr><tr><td class="mono">S-0012</td><td>${pill('Failed','fail')}</td><td class="mono">TIMEOUT</td><td class="small">120s 초과</td></tr></table></div>`;return;}
+  }
+  ({run:renderRun,report:renderReport,errors:renderErrors,compare:renderCompare,scene:renderScene})[state.view]();
+  window.scrollTo({top:0});
+}
+
+/* ---------- F1 평가 실행 ---------- */
+const PRESETS=[['google/gemma-4-12b-it','Base · Gemma 4 12B'],['team1/gemma-4-12b-alley-lora','Tuned · LoRA'],['google/gemma-4-e4b-it','Gemma 4 E4B'],['Qwen/Qwen3-VL-8B-Instruct','Qwen3-VL-8B (비교용)']];
+function renderRun(){
+  const R=state.run;const st={idle:['','대기'],running:['run','실행 중'],done:['ok','완료'],failed:['err','일부 실패']}[R.status];
+  document.getElementById('app').innerHTML=`
+  <div class="head"><h1>평가 실행</h1><span class="crumb">어떤 모델과 Test Version으로 실행하는가</span><span class="sp"></span>${pill('mock · 실제 호출 아님','mock')}</div>
+  <div class="grid cols-2" style="grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:start">
+    <div class="card section">
+      <div class="field"><label>모델 (Hugging Face ID)</label><input type="text" id="model" value="${esc(R.model)}" oninput="state.run.model=this.value"></div>
+      <div class="presets">${PRESETS.map(([id,l])=>`<button class="sm ${R.model===id?'on':''}" onclick="state.run.model='${id}';render()">${l}</button>`).join('')}</div>
+      <div class="grid cols-2">
+        <div class="field"><label>Test Version</label><select id="test" onchange="state.run.test=this.value"><option>${report.test_version}</option><option disabled>test-v0.2 (준비 중)</option></select></div>
+        <div class="field"><label>입력 조건</label><select id="cond" onchange="state.run.cond=this.value"><option ${R.cond==='정상 영상'?'selected':''}>정상 영상</option><option ${R.cond==='영상 없음'?'selected':''}>영상 없음 (이미지 의존도 보조 실험)</option></select></div>
+      </div>
+      <div class="small muted">Test freeze: 입력·정답·채점 규칙은 고정되어 있으며 결과는 마지막에 한 번만 채점합니다. 프롬프트 p0.1 · schema s0.1 · seed 7 · 채점 Code ${report.scorer_commit}. 어떤 모델이든 HF ID로 지정하고 같은 출력 Schema로 채점합니다.</div>
+      <div style="display:flex;gap:8px;align-items:center"><button class="primary" ${R.status==='running'?'disabled':''} onclick="startRun()">실행 (${R.total} 요청)</button><span class="small"><span class="dot ${st[0]}"></span>${st[1]}</span></div>
+      ${R.status!=='idle'?`<div class="bar"><i style="width:${(R.done/R.total)*100}%"></i></div><div class="small muted">${R.done} / ${R.total} 완료 · 실패 ${R.failed} · 남은 요청 ${R.total-R.done}</div>`:''}
+      ${R.status==='done'||R.status==='failed'?`<div class="grid cols-2"><div class="card flat stat"><div class="label">V1 schema 유효율</div><div class="val num">${(((R.total-R.failed)/R.total)*100).toFixed(1)}%</div><div class="sub">${R.total-R.failed} / ${R.total}</div></div><div class="card flat stat"><div class="label">V2 Invalid 비율</div><div class="val num">${((R.failed/R.total)*100).toFixed(1)}%</div><div class="sub">형식 오류·Timeout. 원본 응답은 보존, V10에서 실패로 집계</div></div></div><div style="display:flex;gap:8px"><button class="primary" onclick="go('report')">F2 결과 Report 보기</button>${R.failed?`<button onclick="startRun(true)">실패 ${R.failed}건 재실행</button>`:''}</div>`:''}
+    </div>
+    <div class="card section"><h3>실행 기록 · ${report.test_version}</h3>
+      <div class="tablewrap"><table><tr><th>run</th><th>모델</th><th>입력</th><th>상태</th><th class="num">성공</th><th class="num">실패</th><th class="num">V1</th><th class="num">V2</th></tr>
+      ${report.runs.map(r=>`<tr><td class="mono small">${r.run_id}</td><td>${mlabel(r.model)}</td><td class="small">${r.input_condition}</td><td>${r.status==='done'?pill('완료','pass'):pill('대기','warn')}</td><td class="num">${r.ok}</td><td class="num">${r.failed}</td><td class="num">${r.V1_schema_valid!=null?(r.V1_schema_valid*100).toFixed(0)+'%':'—'}</td><td class="num">${r.V2_invalid!=null?(r.V2_invalid*100).toFixed(0)+'%':'—'}</td></tr>`).join('')}</table></div>
+      <div class="small muted">U1: 모든 요청의 응답과 실패 상태가 저장되고 V1·V2가 표시된다.</div>
+    </div>
+  </div>
+  ${dev('F1 백엔드 요구',`<code>POST /runs</code> { model_id, test_version, input_condition, prompt_version, schema_version } → run_id · <code>GET /runs/{run_id}</code> → status, progress{done,failed,total}, V1, V2, failures[] · <code>POST /runs/{run_id}/retry</code> 실패 요청만 재실행 · <code>GET /tests</code> frozen Test Version 목록`)}`;
+}
+function startRun(retry){const R=state.run;if(!retry){R.done=0;R.failed=0;}R.status='running';render();
+  const tick=()=>{if(R.done<R.total){R.done++;if(!retry&&R.done===8)R.failed=1;render();setTimeout(tick,140);}else{if(retry)R.failed=0;R.status=R.failed?'failed':'done';render();}};setTimeout(tick,200);}
+
+/* ---------- F2 결과 Report ---------- */
+function renderReport(){
+  const c=report.core,cmp=report.comparison,d=report.diagnostics;
+  const verdict=v=>v==='improved'?'<span class="verdict improved">개선</span>':'<span class="verdict not_confirmed">차이를 확인하지 못함</span>';
+  document.getElementById('app').innerHTML=`
+  ${head()}
+  <div class="head"><h1>결과 Report · Base vs Tuned</h1><span class="crumb">Base 대비 개선되었는가</span></div>
+  <div class="card section"><h3>대표 점수 · 분모와 95% 신뢰구간</h3>
+    <div class="tablewrap"><table><tr><th>지표</th><th>Base (95% CI)</th><th>Tuned (95% CI)</th><th>차이 (95% CI)</th><th>판정</th></tr>
+    ${['V5','V10'].map(k=>`<tr><td><b>${c[k].label}</b> <span class="muted small">n=${c[k].n}</span></td><td class="num">${f2(c[k].base.value)} ${ci(c[k].base)}</td><td class="num">${f2(c[k].tuned.value)} ${ci(c[k].tuned)}</td><td class="num">${cmp[k].diff>0?'+':''}${f2(cmp[k].diff)} ${ci(cmp[k])}</td><td>${verdict(cmp[k].verdict)}</td></tr>`).join('')}</table></div>
+    <div class="small muted">관계 평가 n=${report.n_relation} (제외 ${report.excluded.relation.count}: ${Object.entries(report.excluded.relation.reasons).map(([k,v])=>k+' '+v).join(', ')}) · 대응 평가 n=${report.n_action} (제외 ${report.excluded.action.count}: ${Object.entries(report.excluded.action.reasons).map(([k,v])=>k+' '+v).join(', ')}) · ${report.n_source_groups} Source Group · V10 = ${c.V10.base.k}/${c.V10.n} → ${c.V10.tuned.k}/${c.V10.n} · ${esc(c.V5.note)}. 차이 구간은 Source Group 단위 Paired Bootstrap. 개선은 차이 구간의 하한이 0보다 클 때만 표시하며, 판정 값은 Report API를 그대로 따릅니다.</div>
+  </div>
+  <div class="section"><h3>진단 점수</h3><div class="card tablewrap" style="padding:4px 6px"><table><tr><th>점수</th><th class="num">Base</th><th class="num">Tuned</th><th>뜻</th></tr>${Object.entries(report.diag_scores).map(([k,v])=>`<tr><td><b>${v.label}</b></td><td class="num">${(v.base[0]/v.base[1]*100).toFixed(0)}% <span class="ci">${v.base[0]}/${v.base[1]}</span></td><td class="num">${(v.tuned[0]/v.tuned[1]*100).toFixed(0)}% <span class="ci">${v.tuned[0]}/${v.tuned[1]}</span></td><td class="small muted">${k==='V6'?'있는 관계를 놓치지 않는 정도':k==='V7'?'없는 관계를 있다고 하는 정도 (낮을수록 좋음)':k==='V11'?'필요 대응 묶음 중 충족한 비율':'금지 쌍이 확인된 답의 비율 (낮을수록 좋음)'}</td></tr>`).join('')}</table></div></div>
+  <div class="section"><h3>진단 지표군 · 실패 장면 수 (클릭 → F3)</h3>
+    <div class="grid cols-4">${Object.entries(d).map(([k,v])=>`<div class="card stat click" onclick="go('errors',{filters:{diag:['${k}'],rel:null,cond:null}})"><div class="label">${v.label} <span class="mono">${v.metrics}</span></div><div class="val num">${v[state.model].fail_scenes}<span class="muted" style="font-size:13px;font-weight:400"> / ${report.n_relation}</span></div><div class="sub">${v.desc}</div></div>`).join('')}</div>
+    <div class="filters"><span class="lbl">모델</span>${['base','tuned'].map(m=>`<button class="sm ${state.model===m?'on':''}" onclick="state.model='${m}';render()">${mlabel(m)}</button>`).join('')}<span class="small muted">· 한 장면이 여러 지표군에 들어갈 수 있음</span></div>
+  </div>
+  <div class="section"><h3>조건별 점수 · V5 (클릭 → F3)</h3>
+    <div class="card tablewrap" style="padding:4px 6px"><table><tr><th>조건</th><th class="num">n</th><th>Base (95% CI)</th><th>Tuned (95% CI)</th><th></th></tr>
+    ${report.conditions.map(x=>`<tr class="row" onclick="go('errors',{filters:{diag:[],rel:null,cond:'${x.label}'}})"><td>${x.label}</td><td class="num">${x.n}</td><td class="num">${f2(x.base.v5)} ${ci(x.base)}</td><td class="num">${f2(x.tuned.v5)} ${ci(x.tuned)}</td><td>${x.n<report.exploratory_threshold?pill('탐색적 결과 · n<'+report.exploratory_threshold,'warn'):''}</td></tr>`).join('')}</table></div>
+    <div class="small muted">U5: 분모가 작은 조건은 탐색적 결과로 표시한다. 운행 확대 여부는 판정하지 않는다.</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="go('errors')">F3 오류 목록</button><button onclick="go('compare')">F4 모델 비교</button><button class="ghost" onclick="go('run')">+ 새 실행</button></div>
+  ${dev('F2 백엔드 요구 (Report API)',`<code>GET /reports?test=...&base=run_id&target=run_id</code> → core{V5,V10 ×{value,ci,n}}, comparison{diff,ci,verdict: improved|not_confirmed}, diag_scores{V6,V7,V11,V12}, diagnostics{evidence,bias,action,explain ×{fail_scenes}}, conditions[{label,n,base,tuned}], excluded{relation,action ×{count,reasons}}, label_version, scorer_commit. 화면은 verdict를 계산하지 않고 그대로 표시.`)}`;
+}
+
+/* ---------- F3 오류 목록 ---------- */
+function renderErrors(){
+  const list=filtered(),F=state.filters,m=state.model;
+  const btn=(on,label,fn)=>`<button class="sm ${on?'on':''}" onclick="${fn}">${label}</button>`;
+  document.getElementById('app').innerHTML=`
+  ${head('오류 목록')}
+  <div class="head"><button class="ghost" onclick="go('report')">← Report</button><h1>오류 목록</h1><span class="crumb">어떤 장면에서 어떤 종류로 틀렸는가</span><span class="sp"></span><span class="muted num small">${list.length}건</span></div>
+  <div class="card section">
+    <div class="filters"><span class="lbl">모델</span>${['base','tuned'].map(x=>btn(m===x,mlabel(x),`state.model='${x}';render()`)).join('')}</div>
+    <div class="filters"><span class="lbl">진단 지표군</span>${Object.entries(DIAG).map(([k,v])=>btn(F.diag.includes(k),`${v.label} <span class="mono">${v.metrics}</span>`,`toggleDiag('${k}')`)).join('')}</div>
+    <div class="filters"><span class="lbl">관계 오류</span>${Object.entries(REL).map(([k,v])=>btn(F.rel===k,`${k} ${v.label}`,`state.filters.rel=state.filters.rel==='${k}'?null:'${k}';render()`)).join('')}</div>
+    <div class="filters"><span class="lbl">조건</span>${['야간','보도 없음','일방통행'].map(c=>btn(F.cond===c,c,`state.filters.cond=state.filters.cond==='${c}'?null:'${c}';render()`)).join('')}<span class="sp"></span><button class="ghost sm" onclick="state.filters={diag:[],rel:null,cond:null};render()">필터 초기화</button></div>
+  </div>
+  ${list.length===0?`<div class="empty"><b>조건에 맞는 실패 장면이 없습니다</b><button onclick="state.filters={diag:[],rel:null,cond:null};render()">필터 초기화</button></div>`:`
+  <div class="card tablewrap" style="padding:4px 6px"><table>
+    <tr><th>scene</th><th>조건</th><th>장면 (가상)</th><th>대응 채점</th><th>실패 사유</th><th>진단 지표군</th><th>관계 오류</th></tr>
+    ${list.map(s=>{const sc=s.scoring[m];const relErr=Object.entries(sc.relations).filter(([k,v])=>v.ok===false).map(([k])=>k);
+      return `<tr class="row" onclick="go('scene',{sceneId:'${s.scene_id}'})"><td class="mono">${s.scene_id}</td><td>${s.conditions.map(c=>pill(c,'dim')).join(' ')}</td><td style="min-width:200px" class="small">${esc(s.scene)}</td>
+      <td>${sc.pass===null?pill(s.reference.actions?'Not applicable':'방향 충돌 제외','na'):sc.pass?pill('통과','pass'):pill('실패','fail')}</td>
+      <td>${sc.fail_labels.length?sc.fail_labels.map(l=>pill(l,'fail')).join(' '):'<span class="muted">—</span>'}</td>
+      <td>${sc.diag.map(d=>pill(DIAG[d].label,'neutral')).join(' ')||'<span class="muted">—</span>'}</td>
+      <td class="mono small">${relErr.join(', ')||'<span class="muted">—</span>'}</td></tr>`;}).join('')}
+  </table></div>`}
+  <div class="small muted">U3: 필요 대응 누락과 금지 대응을 구분해 보여 준다. 실패 사유 5종(형식 오류 · 필요 대응 누락 · 금지 대응 · 근거가 확인되지 않은 대응 · 관계 판정과의 모순)은 색만으로 구분하지 않고 이름표를 함께 표시한다. Invalid와 Timeout은 별도 상태.</div>
+  ${dev('F3 백엔드 요구',`<code>GET /runs/{run_id}/scenes?status=fail&diag=evidence,bias&relation=R3&condition=야간&page=&size=</code> → scene_id, conditions, thumbnail_url, scoring{pass, fail_reasons[], diag[], relations{R1..R4:{gt,pred,ok}}}. 정렬: 실패 사유 수 → scene_id.`)}`;
+}
+function toggleDiag(k){const a=state.filters.diag;const i=a.indexOf(k);i>=0?a.splice(i,1):a.push(k);render();}
+
+/* ---------- F4 모델 비교 ---------- */
+function renderCompare(){
+  const sel=(state.sceneId&&scored.find(x=>x.scene_id===state.sceneId))?state.sceneId:'S-0002';const s=scenes.find(x=>x.scene_id===sel);
+  const rows=scored.map(x=>`<tr class="row ${x.scene_id===sel?'on':''}" onclick="state.sceneId='${x.scene_id}';render()"><td class="mono">${x.scene_id}</td><td class="small">${esc(x.scene)}</td>${['base','tuned'].map(m=>{const sc=x.scoring[m];return `<td>${sc.pass===null?pill('N/A','na'):sc.pass?pill('통과','pass'):pill('실패','fail')}</td>`;}).join('')}<td>${x.scoring.base.pass!==x.scoring.tuned.pass?pill('달라짐','neutral'):''}</td></tr>`).join('');
+  document.getElementById('app').innerHTML=`
+  ${head('모델 비교')}
+  <div class="head"><button class="ghost" onclick="go('report')">← Report</button><h1>모델 비교</h1><span class="crumb">같은 장면에서 두 모델의 판단이 어떻게 다른가</span></div>
+  <div class="grid cols-2" style="grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr);align-items:start">
+    <div class="card tablewrap" style="padding:4px 6px"><table><tr><th>scene</th><th>장면</th><th>Base</th><th>Tuned</th><th></th></tr>${rows}</table></div>
+    <div class="section">
+      <div class="head"><h2 class="mono">${s.scene_id}</h2>${s.conditions.map(c=>pill(c,'dim')).join('')}<span class="sp"></span><button class="sm" onclick="go('scene',{sceneId:'${s.scene_id}'})">F5 장면 상세 →</button></div>
+      <div class="scene">${sceneSVG(s,'tuned',{layers:{c:true,gt:true,pred:false}})}<span class="tag pill mock">가상 이미지 · 정답 레이어만</span></div>
+      <div class="cmp">${['base','tuned'].map(m=>modelCol(s,m)).join('')}</div>
+    </div>
+  </div>
+  ${dev('F4 백엔드 요구',`<code>GET /scenes/{scene_id}?runs=run_a,run_b</code> → reference + predictions{run_a,run_b} + scoring{run_a,run_b}. F5와 같은 응답, run 2개.`)}`;
+}
+function modelCol(s,m){
+  const p=s.predictions[m],sc=s.scoring[m];
+  if(!p.valid)return `<div class="col ${m==='base'?'a':'b'}"><h2>${pill(mlabel(m),m==='base'?'neutral':'pred')} ${esc(M[m].desc)}</h2><div class="notice fail">${pill('Invalid','fail')} 모델 출력 형식 오류 · 채점 불가<br><span class="mono small">${esc(p.raw_excerpt)}…</span></div></div>`;
+  return `<div class="col ${m==='base'?'a':'b'}"><h2>${pill(mlabel(m),m==='base'?'neutral':'pred')} <span class="muted small" style="font-weight:400">${esc(M[m].desc)}</span><span class="sp"></span>${sc.pass===null?pill('N/A','na'):sc.pass?pill('통과','pass'):pill('실패','fail')}</h2>
+    <dl class="kv"><dt>근거</dt><dd>${[...p.objects,...p.regions].length?[...p.objects,...p.regions].map(o=>`<span class="mono">${o.id}′</span> ${esc(o.class)}`).join(' · '):'<span class="muted">없음</span>'}</dd><dt>속성</dt><dd>${sceneAttrs(p.scene)}</dd>
+    <dt>관계</dt><dd>${['R1','R2','R3','R4'].map(r=>{const v=sc.relations[r];return `<span class="mono small">${r}</span> ${pau(v?v.pred:null)}${v&&v.ok===false?' <span class="pill fail">≠정답</span>':''}`;}).join(' &nbsp; ')}</dd>
+    <dt>대응</dt><dd class="actlist">${p.actions.map(actPair).join('')}</dd>
+    <dt>사유</dt><dd>${sc.fail_labels.length?sc.fail_labels.map(l=>pill(l,'fail')).join(' '):'<span class="muted">—</span>'}</dd>
+    <dt>설명</dt><dd class="small">${esc(p.explanation)}${sc.explain_ok===false?`<br>${pill('설명 오류','fail')} <span class="muted">${esc(sc.explain_note)}</span>`:''}</dd></dl></div>`;
+}
+
+/* ---------- F5 장면 상세 ---------- */
+function renderScene(){
+  const list=filtered();const s=scenes.find(x=>x.scene_id===state.sceneId)||list[0]||scenes[1];state.sceneId=s.scene_id;
+  const idx=list.findIndex(x=>x.scene_id===s.scene_id),m=state.model,ref=s.reference,p=s.predictions[m],sc=s.scoring[m];
+  const refObj=[...ref.objects.map(objLabel),...ref.regions.map(o=>`<span class="mono">${o.id}</span> ${esc(o.class)} <span class="muted small">Region</span>`)].join(' · ');
+  const grm=Object.fromEntries(ref.relations.map(r=>[r.code,r]));const refRel=['R1','R2','R3','R4'].map(r=>{const v=grm[r];return `<span class="mono small">${r}</span> ${pau(v?v.state:null)}${v&&v.evidence.length?` <span class="muted small">(${v.evidence.join(', ')})</span>`:''}`;}).join(' &nbsp; ');
+  const acts=ref.actions;
+  const inGroups=acts?new Set(acts.required_groups.flatMap(g=>g.alts.map(a=>a.join('|')))):new Set();
+  const refAct=acts?`<div class="actlist">${acts.required_groups.map((g,i)=>`<span class="a">${pill('필요 묶음 '+(i+1),'pass')}<span class="muted small">${esc(g.why)} →</span> ${g.alts.map(actPair).join(' <span class="muted small">또는</span> ')}</span>`).join('')}${acts.allowed.filter(a=>!inGroups.has(a.join('|'))).map(a=>`<span class="a">${pill('허용','dim')}${actPair(a)}</span>`).join('')}${acts.forbidden.map(a=>`<span class="a">${pill('금지','fail')}${actPair(a)}</span>`).join('')}</div>`:s.missing?pill('Missing · 검수 전','warn'):pill('Not applicable · 방향 충돌 장면은 대응 평가 제외','na');
+  const banner=s.missing?`<div class="notice">${pill('Missing','warn')} ${esc(s.missing)}. 채점에서 제외되었고 사유를 공개합니다.</div>`:(!acts&&p.valid)?`<div class="notice">${pill('Not applicable','na')} Direction Match = Conflicting · 맞는 대응이 존재하지 않아 대응 평가(V10–V12)에서 제외. 관계(V5–V9)·속성(A1·A2)은 채점.${sc.diag.length?' · '+sc.diag.map(d=>pill(DIAG[d].label,'neutral')).join(' '):''}</div>`
+    :!p.valid?`<div class="notice fail">${pill('Invalid','fail')} 모델 출력 형식 오류 · 채점 불가 · 대응 평가 실패 사유: 형식 오류 <button class="sm" onclick="go('run')">F1에서 재실행</button></div>`
+    :sc.pass?`<div class="notice pass"><b>대응 평가 통과</b>${sc.diag.length?' · 그러나 '+sc.diag.map(d=>pill(DIAG[d].label,'neutral')).join(' ')+' — 대응이 맞아도 근거·관계·설명까지 맞다는 뜻은 아닙니다.':''}</div>`
+    :`<div class="notice fail"><b>대응 평가 실패</b> · ${sc.fail_labels.map(l=>pill(l,'fail')).join(' ')} · ${sc.diag.map(d=>pill(DIAG[d].label,'neutral')).join(' ')}</div>`;
+  const predChain=!p.valid?'':`
+      <div class="chain"><div class="step pred"><div class="t">${pill('예측','pred')} 근거 Object · Region</div><div>${[...p.objects,...p.regions].length?[...p.objects,...p.regions].map(o=>{const mt=sc.boxes.matched.find(x=>x.pred===o.id);const ex=sc.boxes.extra.includes(o.id);return `<span class="mono">${o.id}′</span> ${esc(o.class)} ${mt?`<span class="pill pass">↔ ${mt.gt} IoU ${mt.iou}</span>`:ex?'<span class="pill fail">정답과 짝 없음</span>':''}`;}).join(' · '):'<span class="muted">없음</span>'}${sc.boxes.missed.length?`<br><span class="pill fail">누락</span> <span class="small muted">정답 ${sc.boxes.missed.join(', ')} 짝 없음</span>`:''}<br><span class="small">${sceneAttrs(p.scene)}</span></div></div>
+      <div class="arrow">↓</div><div class="step pred"><div class="t">${pill('예측','pred')} 관계 판정 · 근거 ID</div><div class="rels">${['R1','R2','R3','R4'].map(r=>{const g=sc.relations[r];const em=sc.evidence_match[r];return `<div class="rel"><span class="n">${r} ${REL[r].label}</span><div class="vs">${pau(g?g.pred:null)}${g&&g.ok===false?`<span class="pill fail">정답 ${g.gt}</span>`:g&&g.ok?'<span class="pill pass">일치</span>':''}</div>${g&&g.pred_evidence.length?`<span class="small muted">근거 ${g.pred_evidence.join(', ')}${em===true?' ✓':em===false?' <span class="pill fail">V4 불일치</span>':''}</span>`:em===false?'<span class="pill fail">근거 없음</span>':''}</div>`;}).join('')}</div></div>
+      <div class="arrow">↓</div><div class="step pred last"><div class="t">${pill('예측','pred')} 대응 · (대응, 조건) 쌍</div><div class="actlist">${p.actions.map(a=>{const key=a.code+'|'+a.condition;const fb=acts&&acts.forbidden.some(x=>x.join('|')===key),al=acts&&acts.allowed.some(x=>x.join('|')===key),req=inGroups.has(key);const prm=Object.fromEntries(p.relations.map(r=>[r.code,r]));const needs={while_corridor_occupied:['R1',['P']],while_actor_near_entrance:['R2',['P']],before_entering_occluded_area:['R3',['P']],before_passing_restricted_section:['R4',['P','U']]}[a.condition];const contra=needs&&(!needs[1].includes(prm[needs[0]]&&prm[needs[0]].state)||!a.based_on.includes(needs[0]));return `<span class="a">${actPair(a)}${!acts?'':contra?pill('관계 판정과 모순','fail'):fb?pill('금지','fail'):req?pill('필요 묶음 충족','pass'):al?pill('허용','dim'):pill('근거 확인되지 않음','fail')}</span>`;}).join('')}${acts?acts.required_groups.map((g,i)=>sc.groups_hit&&sc.groups_hit[i]?'':`<span class="a">${pill('묶음 '+(i+1)+' 누락','fail')}<span class="muted small">${g.alts.map(x=>actLabel(x[0])).join(' 또는 ')}</span></span>`).join(''):''}</div></div></div>`;
+  document.getElementById('app').innerHTML=`
+  ${head('장면 상세 · '+s.scene_id)}
+  <div class="head"><button class="ghost" onclick="go('errors')">← 목록 (필터 유지)</button><h1 class="mono" style="font-size:16px">${s.scene_id}</h1>${s.conditions.map(c=>pill(c,'dim')).join('')}
+    <span class="filters"><span class="lbl" style="min-width:0">모델</span>${['base','tuned'].map(x=>`<button class="sm ${m===x?'on':''}" onclick="state.model='${x}';render()">${mlabel(x)}</button>`).join('')}</span>
+    <span class="sp"></span><button class="sm" ${idx<=0?'disabled':''} onclick="go('scene',{sceneId:'${list[idx-1]?.scene_id}'})">← 이전</button><span class="muted num small">${idx>=0?idx+1:'–'} / ${list.length}</span><button class="sm" ${idx<0||idx>=list.length-1?'disabled':''} onclick="go('scene',{sceneId:'${list[idx+1]?.scene_id}'})">다음 →</button></div>
+  ${banner}
+  <div class="grid cols-2" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start">
+    <div class="wrapcol section">${sceneBox(s,m)}<div class="small muted">${esc(s.scene)}. 좌표는 0–1 정규화, Box 짝짓기는 IoU>0.5.</div>
+      <div class="card flat"><dl class="kv"><dt>정답 출처</dt><dd>${esc(ref.source)} · Source Group ${esc(s.source_group)}</dd><dt>검수 상태</dt><dd>${ref.review_status==='Reviewed'?pill('Reviewed','pass'):pill(ref.review_status,'warn')}</dd><dt>C</dt><dd class="small">진행 의도와 도로 구조만으로 정한 평가 영역(가상 주행 복도). 모델에는 제공하지 않음.</dd></dl></div></div>
+    <div class="wrapcol section"><h3>근거 → 관계 → 대응</h3>
+      <div class="chain"><div class="step gt"><div class="t">${pill('GT','gt')} 근거 Object</div><div>${refObj||'<span class="muted">없음</span>'}</div></div>
+        <div class="arrow">↓</div><div class="step gt"><div class="t">${pill('GT','gt')} 관계 · 근거 ID</div><div>${refRel}</div><div class="small">${sceneAttrs(ref.scene)}</div></div>
+        <div class="arrow">↓</div><div class="step gt last"><div class="t">${pill('GT','gt')} 대응 · 필요 / 허용 / 금지</div>${refAct}</div></div>
+      ${predChain?`<h3 style="margin-top:8px">${esc(M[m].label)} · ${esc(M[m].desc)}</h3>${predChain}
+      <div class="card flat small"><b>설명</b> ${esc(p.explanation)}${sc.explain_ok===false?`<br>${pill('설명 오류','fail')} ${esc(sc.explain_note)}`:sc.explain_ok?`<br>${pill('검수 적절','pass')}`:''}</div>`:''}
+    </div>
+  </div>
+  <div class="card flat small muted"><b>P/A/U</b> · P ${meta.pau.P} · A ${meta.pau.A} · U ${meta.pau.U} &nbsp;|&nbsp; <b>빈 값</b> · Invalid ${meta.empty_values.Invalid} · Missing ${meta.empty_values.Missing} · Not applicable ${meta.empty_values['Not applicable']}</div>
+  ${dev('F5 백엔드 요구',`<code>GET /scenes/{scene_id}?run=run_id</code> → image_url, C[[x,y]], reference{objects[{id,class,kind,placement,bbox}], regions[{id,class,bbox}], scene{sidewalk_left,sidewalk_right,traffic_direction,direction_match}, relations[{code,state,evidence[]}], actions{required_groups[{why,alts[[code,condition]]}],allowed,forbidden}|null, source, review_status}, prediction{valid, objects, regions, scene, relations, actions[{code,condition,based_on}], explanation, raw_excerpt} (App.B.4 출력 Schema), scoring{pass, fail_reasons[], diag[], relations{..:{gt,pred,ok,gt_evidence,pred_evidence}}, evidence_match{}, boxes{matched[{gt,pred,iou}],missed,extra}, groups_hit[], explain_ok, explain_note}. 이전/다음은 F3 필터와 같은 쿼리.`)}`;
+}
+const v0=location.hash.replace('#','');if(VIEWS.includes(v0))state.view=v0;
+render();
+</script>

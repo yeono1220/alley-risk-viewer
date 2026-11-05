@@ -3,7 +3,7 @@
 보도 없는 생활도로 VLM 평가 Benchmark의 **Web Viewer** (프론트엔드). 명세서(Role_Frontend) 기준.
 점수 → 실패 장면 → 판단 근거로 내려가는 흐름을 제공하고, 정답과 예측을 구분해 **근거 Object → 관계 판정(R1–R4) → 대응**의 연결을 보여 준다.
 
-> 현재 상태: 가상(mock) 데이터로 F1–F5와 상태 화면이 동작하는 단일 HTML 프로토타입. React 구현은 2주차 Schema 확정 후.
+> 현재 상태: 가상(mock) 데이터로 F1–F5와 상태 화면이 동작하는 단일 HTML 프로토타입. 기본 모델은 Gemma 4(명세 §4.5). React 구현은 2주차 Schema 확정 후.
 
 ## 화면
 
@@ -28,13 +28,15 @@
 
 ## 파일
 
+`prototype/build.py` 가 `template.html` + `mock/*.json` → `index.html` 로 합친다 (`cd prototype && python3 build.py`). mock은 `python3 mock/gen.py` 로 재생성.
+
 | 경로 | 내용 |
 |---|---|
 | `prototype/index.html` | 단일 HTML 프로토타입 (GitHub Pages 배포 가능) |
-| `mock/report.json` | Report API 응답 제안 — core, comparison, diagnostics, conditions, excluded, runs |
-| `mock/scenes.json` | 장면별 reference·predictions(base/tuned)·scoring |
-| `mock/meta.json` | 관계·대응 Code·실패 사유·진단 지표군 enum |
-| `mock/gen.py` | mock 생성 스크립트 (채점 로직 포함, 백엔드 채점기와 맞춰야 함) |
+| `mock/report.json` | Report API 응답 제안 — core(V5·V10), comparison(verdict), diag_scores(V6·V7·V11·V12), diagnostics, conditions, excluded(relation/action), runs |
+| `mock/scenes.json` | 장면별 reference(objects·regions·scene·relations[code,state,evidence]·actions{required_groups,allowed,forbidden})·predictions(App.B.4 Schema)·scoring |
+| `mock/meta.json` | 관계 R1–R4·대응 Code 7종·조건 Code 6종·실패 사유 5종·진단 지표군 enum |
+| `mock/gen.py` | mock 생성 스크립트. App.B.2 규칙으로 GT 관계 → 필요 묶음/허용/금지 도출, App.A 채점(V3 IoU 짝짓기·V4 근거 ID·V10 일관성/허용/금지/묶음) 구현. 백엔드 자동 채점기가 기준이며 이건 화면 검토용 |
 | `docs/plan-draft-2026-11-01.md` | 11/1 구현 계획 초안 |
 
 ## 백엔드 요구 (초안)
